@@ -492,8 +492,8 @@ if(!reduce)setInterval(()=>{rot.style.opacity=0;setTimeout(()=>{ri=(ri+1)%sets.l
 
 // ===== Lead form =====
 // ใส่ค่าจาก Supabase (Project Settings → API) ตรงนี้ ถ้าเว้นว่าง ฟอร์มจะทำงานแต่ไม่ส่งข้อมูลไปไหน
-const SUPABASE_URL = '';   // เช่น 'https://abcd1234.supabase.co'
-const SUPABASE_KEY = '';   // anon public key
+const SUPABASE_URL = 'https://xkbhhtauzqgvryeocmiz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_14U9zriQnKcTb7PSA97zMQ_g1DuzDy-';   // publishable key (ปลอดภัยที่จะอยู่ในหน้าเว็บ)
 
 const QUESTIONS = [
   {key:'age_range', q:'ช่วงอายุของคุณ', two:true, opts:['18–24','25–34','35–44','45–54','55 ขึ้นไป','ไม่ระบุ']},
@@ -563,7 +563,9 @@ async function saveLead(row){
   }
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
     method:'POST',
-    headers:{apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', Prefer:'return=minimal'},
+    // คีย์แบบใหม่ (sb_publishable_...) ส่งใน apikey อย่างเดียว ส่วนคีย์ anon แบบเก่า (eyJ...) ส่งใน Authorization ด้วย
+    headers:Object.assign({apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
+      SUPABASE_KEY.startsWith('eyJ') ? {Authorization:`Bearer ${SUPABASE_KEY}`} : {}),
     body:JSON.stringify(row)
   });
   if(!res.ok) throw new Error(await res.text());
