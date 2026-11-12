@@ -22,6 +22,7 @@
   --band:#f8f1e6;        /* light champagne band */
   --band-ink:#2e231b;
   --btn-ink:#fffaf3;
+  --err:#b3261e;
   --f-script:"Prompt", "Anuphan", system-ui, sans-serif;   /* light-weight large accent */
   --f-display:"Montserrat", "Prompt", system-ui, sans-serif;
   --f-head:"Prompt", "Montserrat", system-ui, sans-serif;
@@ -31,10 +32,10 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#1c1511;--bg-2:#251c16;--card:#2a2019;--ink:#f3e7d6;--ink-soft:#c3b19c;
-  --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;color-scheme:dark}}
+  --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;--err:#f2b8b5;color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1c1511;--bg-2:#251c16;--card:#2a2019;--ink:#f3e7d6;--ink-soft:#c3b19c;
-  --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;color-scheme:dark}
+  --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;--err:#f2b8b5;color-scheme:dark}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -153,6 +154,21 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:co
 .opt:hover,.opt:focus-visible{border-color:var(--gold);outline:none}
 .opt.sel{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--bg))}
 .opt b{font-family:var(--f-display);color:var(--gold);width:18px}
+.opts.two{grid-template-columns:1fr 1fr}
+@media (max-width:420px){.opts.two{grid-template-columns:1fr}}
+.field{display:grid;gap:6px}
+.field label{font-size:14px;font-weight:500}
+.field label small{color:var(--ink-soft);font-weight:400}
+.field input{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;width:100%}
+.field input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
+.consent{display:flex;gap:10px;font-size:13px;line-height:1.6;color:var(--ink-soft);align-items:flex-start;cursor:pointer}
+.consent input{margin-top:4px;accent-color:var(--gold);flex:none;width:16px;height:16px}
+.qnav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.link-btn{background:none;border:0;color:var(--ink-soft);font:inherit;font-size:14px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.link-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.err{color:var(--err);font-size:13px;margin:0}
+.done{text-align:center;display:grid;gap:12px;justify-items:center;padding-block:12px}
+.done .tick{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 15%,var(--card));color:var(--gold);font-size:26px}
 .draft{font-size:12px;color:var(--ink-soft);font-style:italic}
 .types{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
 @media (max-width:520px){.types{grid-template-columns:repeat(2,1fr)}}
@@ -317,14 +333,14 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
         <div class="sec-head" style="margin-bottom:0">
           <span class="eyebrow">Step 01 · Personal Type Test</span>
           <h2>คุณเป็นแบรนด์ส่วนตัว<br>แบบไหน?</h2>
-          <p class="lead">ตอบคำถามสั้นๆ ประมาณ 15 ข้อ แล้วรับผลวิเคราะห์ว่าคุณเป็น Personal Type แบบไหน พร้อมคำแนะนำว่าควรสื่อสารอย่างไรให้เป็นตัวเอง</p>
+          <p class="lead">เริ่มจากตอบคำถามเกี่ยวกับตัวคุณ 5 ข้อ แล้วฝากชื่อกับอีเมลไว้ เมื่อแบบทดสอบ Personal Type เปิดเต็มรูปแบบ เราจะส่งลิงก์ให้คุณทำก่อนใคร พร้อมผลวิเคราะห์ว่าควรสื่อสารอย่างไรให้เป็นตัวเอง</p>
         </div>
         <ul class="checks">
           <li>รู้จุดแข็งและเสน่ห์ที่คนอื่นจะจำคุณได้</li>
           <li>รู้สไตล์คอนเทนต์และน้ำเสียงที่เหมาะกับคุณ</li>
           <li>รู้สิ่งที่ควรระวัง เพื่อไม่ให้ตัวตนหลุดจากตัวจริง</li>
         </ul>
-        <button class="btn btn-gold" type="button" id="quizStart">เริ่มทำแบบทดสอบ (เร็วๆ นี้)</button>
+        <button class="btn btn-gold" type="button" id="quizStart">เริ่มเลย ใช้เวลา 1 นาที</button>
         <div class="types" aria-label="ตัวอย่าง Personal Type">
           <div class="type"><b>THE GUIDE</b>ผู้นำทาง</div>
           <div class="type"><b>STORYTELLER</b>นักเล่าเรื่อง</div>
@@ -338,18 +354,13 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
         <p class="draft" style="margin-top:8px">* ชื่อ Type เป็นตัวอย่าง รอเนื้อหาจริงของแบบทดสอบ</p>
       </div>
 
-      <!-- ตัวอย่างหน้าตาคำถาม: จะแทนที่ด้วยระบบแบบทดสอบจริง -->
+      <!-- ฟอร์มเก็บข้อมูลลูกค้า: คำถาม 4 ข้อ + ชื่อ/อีเมล (บันทึกลง Supabase ตาราง leads) -->
       <div class="qcard" id="quizPreview">
-        <div class="qmeta"><span>ตัวอย่างคำถาม</span><span>ข้อ 3 / 15</span></div>
-        <div class="qbar"><i></i></div>
-        <h3>เวลาเพื่อนมาปรึกษาเรื่องยากๆ คุณมักจะ...</h3>
-        <div class="opts" role="radiogroup" aria-label="ตัวเลือก">
-          <button type="button" class="opt" role="radio" aria-checked="false"><b>A</b>ฟังจนจบ แล้วกอดและให้กำลังใจ</button>
-          <button type="button" class="opt" role="radio" aria-checked="false"><b>B</b>ช่วยวางแผนเป็นขั้นตอนให้ทันที</button>
-          <button type="button" class="opt" role="radio" aria-checked="false"><b>C</b>เล่าประสบการณ์ของตัวเองให้ฟัง</button>
-          <button type="button" class="opt" role="radio" aria-checked="false"><b>D</b>ชวนมองมุมใหม่ที่ไม่เคยคิดมาก่อน</button>
+        <div class="qmeta"><span id="qLabel">เกี่ยวกับคุณ</span><span id="qCount">ข้อ 1 / 5</span></div>
+        <div class="qbar"><i id="qBar" style="width:20%"></i></div>
+        <div id="qStage" aria-live="polite">
+          <h3>ช่วงอายุของคุณ</h3>
         </div>
-        <p class="draft">หน้าตาตัวอย่าง ยังไม่บันทึกคำตอบ</p>
       </div>
     </div>
   </section>
@@ -479,11 +490,114 @@ const sets=['ค้นพบตัวตน · วางทิศทาง · �
 const rot=document.getElementById('rotator');let ri=0;
 if(!reduce)setInterval(()=>{rot.style.opacity=0;setTimeout(()=>{ri=(ri+1)%sets.length;rot.textContent=sets[ri];rot.style.opacity=1},400)},3200);
 
-// Quiz preview options (visual only for now)
-document.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.setAttribute('aria-checked','false')});
-  b.classList.add('sel');b.setAttribute('aria-checked','true');
-}));
+// ===== Lead form =====
+// ใส่ค่าจาก Supabase (Project Settings → API) ตรงนี้ ถ้าเว้นว่าง ฟอร์มจะทำงานแต่ไม่ส่งข้อมูลไปไหน
+const SUPABASE_URL = '';   // เช่น 'https://abcd1234.supabase.co'
+const SUPABASE_KEY = '';   // anon public key
+
+const QUESTIONS = [
+  {key:'age_range', q:'ช่วงอายุของคุณ', two:true, opts:['18–24','25–34','35–44','45–54','55 ขึ้นไป','ไม่ระบุ']},
+  {key:'gender', q:'เพศ', opts:['หญิง','ชาย','ไม่ระบุ']},
+  {key:'stage', q:'ตอนนี้การสร้างตัวตนออนไลน์ของคุณอยู่ขั้นไหน', opts:['ยังไม่ได้เริ่ม','เริ่มแล้ว แต่ยังไม่ค่อยได้ผล','มีรายได้แล้ว อยากโตต่อ','ไม่ระบุ']},
+  {key:'pain', q:'เรื่องที่ติดอยู่มากที่สุด', opts:['ไม่รู้จะพูดอะไร','ไม่กล้าออกกล้อง','ไม่มีเวลา','ใช้ AI ไม่เป็น','ไม่ระบุ']},
+  {key:'platform', q:'แพลตฟอร์มหลักที่คุณใช้', two:true, opts:['Facebook','TikTok','Instagram','YouTube','LINE','ไม่ระบุ']},
+];
+const TOTAL = QUESTIONS.length + 1;
+const answers = {};
+let step = 0;
+
+// ที่มาจากโฆษณา (utm / fbclid ในลิงก์)
+const params = new URLSearchParams(location.search);
+const source = {};
+['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k=>{ if(params.get(k)) source[k]=params.get(k); });
+
+const stage = document.getElementById('qStage');
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function setProgress(label){
+  document.getElementById('qLabel').textContent = label;
+  document.getElementById('qCount').textContent = `ข้อ ${Math.min(step+1,TOTAL)} / ${TOTAL}`;
+  document.getElementById('qBar').style.width = `${Math.min(step+1,TOTAL)/TOTAL*100}%`;
+}
+
+function render(){
+  if(step < QUESTIONS.length){
+    const Q = QUESTIONS[step];
+    setProgress('เกี่ยวกับคุณ');
+    stage.innerHTML = `
+      <div style="display:grid;gap:16px">
+        <h3>${esc(Q.q)}</h3>
+        <div class="opts${Q.two?' two':''}" role="radiogroup" aria-label="${esc(Q.q)}">
+          ${Q.opts.map(o=>`<button type="button" class="opt${answers[Q.key]===o?' sel':''}" role="radio" aria-checked="${answers[Q.key]===o}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}
+        </div>
+        <div class="qnav">${step>0?'<button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button>':'<span></span>'}<span class="draft">ทุกข้อเลือก "ไม่ระบุ" ได้</span></div>
+      </div>`;
+    stage.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
+      answers[Q.key] = b.dataset.v;
+      stage.querySelectorAll('.opt').forEach(x=>{x.classList.toggle('sel',x===b);x.setAttribute('aria-checked',x===b)});
+      setTimeout(()=>{step++;render()}, reduce?0:180);
+    }));
+  } else {
+    setProgress('ข้อมูลติดต่อ');
+    stage.innerHTML = `
+      <form id="leadForm" novalidate style="display:grid;gap:14px">
+        <h3>ฝากข้อมูลไว้ เราจะส่งผลแบบทดสอบให้คุณ</h3>
+        <div class="field"><label for="f-name">ชื่อเล่น</label><input id="f-name" name="name" autocomplete="nickname" required></div>
+        <div class="field"><label for="f-email">อีเมล</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>
+        <div class="field"><label for="f-contact">LINE ID หรือเบอร์โทร <small>(ไม่บังคับ)</small></label><input id="f-contact" name="contact" autocomplete="tel"></div>
+        <label class="consent" for="f-consent"><input type="checkbox" id="f-consent" name="consent_data">ยินยอมให้ CoachMew Mastermind เก็บข้อมูลนี้ เพื่อส่งผลแบบทดสอบ และปรับปรุงบริการให้เหมาะกับคุณ</label>
+        <label class="consent" for="f-mkt"><input type="checkbox" id="f-mkt" name="consent_marketing">ยินดีรับข่าวสาร คอนเทนต์ และโปรโมชันจากโค้ชมิว <small>(ไม่บังคับ)</small></label>
+        <p class="err" id="f-err" hidden></p>
+        <div class="qnav"><button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button><button class="btn btn-gold" type="submit" id="f-submit">ส่งข้อมูล</button></div>
+      </form>`;
+    document.getElementById('leadForm').addEventListener('submit', onSubmit);
+  }
+  const back = document.getElementById('qBack');
+  if(back) back.addEventListener('click',()=>{step--;render()});
+}
+
+async function saveLead(row){
+  if(!SUPABASE_URL || !SUPABASE_KEY){
+    console.info('[lead] ยังไม่ได้ตั้งค่า Supabase ข้อมูลนี้ไม่ได้ถูกบันทึก', row);
+    return;
+  }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+    method:'POST',
+    headers:{apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', Prefer:'return=minimal'},
+    body:JSON.stringify(row)
+  });
+  if(!res.ok) throw new Error(await res.text());
+}
+
+async function onSubmit(e){
+  e.preventDefault();
+  const f = e.target, err = document.getElementById('f-err');
+  const name = document.getElementById('f-name').value.trim(), email = f.email.value.trim();
+  const msg = !name ? 'กรุณากรอกชื่อเล่น'
+    : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'กรุณากรอกอีเมลให้ถูกต้อง เช่น name@gmail.com'
+    : !f.consent_data.checked ? 'กรุณาติ๊กยินยอมให้เก็บข้อมูล เพื่อให้เราส่งผลให้คุณได้'
+    : '';
+  if(msg){ err.textContent = msg; err.hidden = false; return; }
+  err.hidden = true;
+  const btn = document.getElementById('f-submit');
+  btn.disabled = true; btn.textContent = 'กำลังส่ง...';
+  try{
+    await saveLead({
+      name, email, contact: f.contact.value.trim() || null,
+      ...answers,
+      consent_data: true, consent_marketing: f.consent_marketing.checked,
+      ...source
+    });
+    step = TOTAL; setProgress('เรียบร้อย');
+    stage.innerHTML = `<div class="done"><div class="tick">✓</div><h3>ขอบคุณค่ะ คุณ${esc(name)}</h3><p class="lead" style="text-align:center">เราได้รับข้อมูลแล้ว เมื่อแบบทดสอบ Personal Type เปิด จะส่งลิงก์ไปที่ ${esc(email)} ก่อนใคร</p></div>`;
+  }catch(ex){
+    console.error(ex);
+    err.textContent = 'ส่งข้อมูลไม่สำเร็จ ลองกดส่งอีกครั้ง หรือทักไลน์โค้ชมิวได้เลย';
+    err.hidden = false; btn.disabled = false; btn.textContent = 'ส่งข้อมูล';
+  }
+}
+render();
+
 document.getElementById('quizStart').addEventListener('click',()=>{
   document.getElementById('quizPreview').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
 });
