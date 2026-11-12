@@ -38,6 +38,7 @@
   --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;--err:#f2b8b5;color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;
@@ -232,7 +233,6 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
       <li><a href="#steps">บริการ</a></li>
       <li><a href="#about">รู้จักโค้ชมิว</a></li>
       <li><a href="#quiz">แบบทดสอบ</a></li>
-      <li><a href="#pricing">ราคา</a></li>
       <li><a href="#faq">คำถามที่พบบ่อย</a></li>
     </ul>
     <a class="btn btn-gold nav-cta" href="#quiz">ทำแบบทดสอบ</a>
@@ -255,12 +255,12 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
         </div>
       </div>
       <div class="banner"><img src="banner.webp" alt="โค้ชมิว เพื่อนร่วมทาง สร้างตัวตนสไตล์คุณแม่ยุค AI" width="2000" height="761"></div>
-      <a class="start" href="#stats">START NOW<span aria-hidden="true">⌄</span></a>
+      <a class="start" href="#steps">START NOW<span aria-hidden="true">⌄</span></a>
     </div>
   </section>
 
   <!-- STATS (ใส่ตัวเลขจริง) -->
-  <section class="stats" id="stats">
+  <section class="stats" id="stats" hidden><!-- ซ่อนไว้: รอตัวเลขจริง ลบคำว่า hidden เพื่อเปิด -->
     <div class="wrap">
       <div class="stat-row">
         <div class="stat"><b data-count="500">0</b><span>คนที่ค้นพบตัวตนกับโค้ชมิว</span></div>
@@ -291,13 +291,13 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
           <div class="step-top"><span class="step-num">STEP 02</span><span class="pill">1:1 · 60–90 นาที</span></div>
           <h3>BRAND BLUEPRINT<small>วางแผนที่ตัวตน</small></h3>
           <p>นั่งคุยกับโค้ชมิวตัวต่อตัว เพื่อกำหนดจุดยืน กลุ่มเป้าหมาย น้ำเสียงในการสื่อสาร และเสาหลักคอนเทนต์ สรุปเป็นเล่มแผนที่นำไปใช้ได้ทันที</p>
-          <a class="btn btn-ghost" href="#pricing">ดูรายละเอียด</a>
+          <a class="btn btn-ghost" href="#contact">สอบถามโค้ชมิว</a>
         </article>
         <article class="step">
           <div class="step-top"><span class="step-num">STEP 03</span><span class="pill">รายเดือน</span></div>
           <h3>MASTERMIND<small>เดินไปด้วยกันอย่างต่อเนื่อง</small></h3>
           <p>กลุ่มเพื่อนร่วมทางที่เจอกันทุกเดือน พร้อมเวิร์กช็อปใช้ AI ช่วยคิดคอนเทนต์ เขียนแคปชัน และตัดคลิป ให้คุณลงมือได้สม่ำเสมอโดยไม่ต้องเริ่มจากศูนย์</p>
-          <a class="btn btn-ghost" href="#pricing">ดูรายละเอียด</a>
+          <a class="btn btn-ghost" href="#contact">สอบถามโค้ชมิว</a>
         </article>
       </div>
     </div>
@@ -366,7 +366,7 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
   </section>
 
   <!-- PRICING -->
-  <section id="pricing">
+  <section id="pricing" hidden><!-- ซ่อนไว้: รอราคาจริง ลบคำว่า hidden เพื่อเปิด -->
     <div class="wrap">
       <div class="sec-head center">
         <span class="eyebrow">Pricing</span>
@@ -415,7 +415,7 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
   </section>
 
   <!-- REVIEWS -->
-  <section id="reviews" style="padding-top:0">
+  <section id="reviews" style="padding-top:0" hidden><!-- ซ่อนไว้: รอรีวิวจริง ลบคำว่า hidden เพื่อเปิด -->
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow">Reviews</span>
@@ -463,7 +463,6 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
     <ul>
       <li><a href="#steps">บริการ</a></li>
       <li><a href="#quiz">แบบทดสอบ</a></li>
-      <li><a href="#pricing">ราคา</a></li>
       <li><a href="#faq">FAQ</a></li>
     </ul>
   </div>
@@ -511,6 +510,23 @@ const params = new URLSearchParams(location.search);
 const source = {};
 ['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k=>{ if(params.get(k)) source[k]=params.get(k); });
 
+// เก็บทุกคำตอบแบบไม่ระบุตัวตน (ตาราง quiz_events) เพื่อดูว่าคนหยุดที่ข้อไหน
+// step: 0 เห็นฟอร์ม, 1–5 ตอบข้อนั้น, 6 ถึงหน้ากรอกชื่อ, 7 ส่งสำเร็จ
+const sbHeaders = () => Object.assign({apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
+  SUPABASE_KEY.startsWith('eyJ') ? {Authorization:`Bearer ${SUPABASE_KEY}`} : {});
+const SESSION = (crypto.randomUUID && crypto.randomUUID()) ||
+  ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c=>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+const tracked = new Set();
+function track(step, question, answer=null, once=false){
+  if(!SUPABASE_URL || !SUPABASE_KEY) return;
+  if(once){ if(tracked.has(question)) return; tracked.add(question); }
+  fetch(`${SUPABASE_URL}/rest/v1/quiz_events`, {
+    method:'POST', keepalive:true, headers:sbHeaders(),
+    body:JSON.stringify({session_id:SESSION, step, question, answer,
+      utm_source:source.utm_source || null, utm_campaign:source.utm_campaign || null})
+  }).catch(()=>{});   // ถ้าส่งไม่ได้ ไม่รบกวนลูกค้า
+}
+
 const stage = document.getElementById('qStage');
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -534,11 +550,13 @@ function render(){
       </div>`;
     stage.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
       answers[Q.key] = b.dataset.v;
+      track(step + 1, Q.key, b.dataset.v);
       stage.querySelectorAll('.opt').forEach(x=>{x.classList.toggle('sel',x===b);x.setAttribute('aria-checked',x===b)});
       setTimeout(()=>{step++;render()}, reduce?0:180);
     }));
   } else {
     setProgress('ข้อมูลติดต่อ');
+    track(QUESTIONS.length + 1, 'contact_form', null, true);
     stage.innerHTML = `
       <form id="leadForm" novalidate style="display:grid;gap:14px">
         <h3>ฝากข้อมูลไว้ เราจะส่งผลแบบทดสอบให้คุณ</h3>
@@ -564,8 +582,7 @@ async function saveLead(row){
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
     method:'POST',
     // คีย์แบบใหม่ (sb_publishable_...) ส่งใน apikey อย่างเดียว ส่วนคีย์ anon แบบเก่า (eyJ...) ส่งใน Authorization ด้วย
-    headers:Object.assign({apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
-      SUPABASE_KEY.startsWith('eyJ') ? {Authorization:`Bearer ${SUPABASE_KEY}`} : {}),
+    headers:sbHeaders(),
     body:JSON.stringify(row)
   });
   if(!res.ok) throw new Error(await res.text());
@@ -590,6 +607,7 @@ async function onSubmit(e){
       consent_data: true, consent_marketing: f.consent_marketing.checked,
       ...source
     });
+    track(TOTAL + 1, 'submit', null, true);
     step = TOTAL; setProgress('เรียบร้อย');
     stage.innerHTML = `<div class="done"><div class="tick">✓</div><h3>ขอบคุณค่ะ คุณ${esc(name)}</h3><p class="lead" style="text-align:center">เราได้รับข้อมูลแล้ว เมื่อแบบทดสอบ Personal Type เปิด จะส่งลิงก์ไปที่ ${esc(email)} ก่อนใคร</p></div>`;
   }catch(ex){
@@ -599,6 +617,12 @@ async function onSubmit(e){
   }
 }
 render();
+
+// บันทึกว่ามีคน "เห็นฟอร์ม" (ครั้งเดียวต่อการเปิดเว็บ)
+if('IntersectionObserver' in window){
+  const io = new IntersectionObserver(es=>{ if(es.some(e=>e.isIntersecting)){ track(0,'view',null,true); io.disconnect(); } }, {threshold:0.4});
+  io.observe(document.getElementById('quizPreview'));
+}
 
 document.getElementById('quizStart').addEventListener('click',()=>{
   document.getElementById('quizPreview').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
