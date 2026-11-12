@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cosmic Identity Quiz · CoachMew Mastermind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@200;300;400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="CoachMew Mastermind หน้าแรก">
+      <span class="logo-mark">M</span>
+      <span class="logo-txt"><b>CoachMew</b><small>MASTERMIND</small></span>
+    </a>
+    <a class="btn btn-ghost" href="index.html" style="padding:8px 18px">← กลับหน้าแรก</a>
+  </div>
+</header>
+
+<main class="quiz-page">
+  <div class="wrap">
+    <div class="quiz-intro">
+      <span class="eyebrow">Cosmic Identity</span>
+      <h1>คุณเป็นดาวดวงไหน?</h1>
+      <p>เล่าเกี่ยวกับตัวคุณสั้นๆ แล้วตอบ 5 สถานการณ์ ไม่มีถูกผิด รู้ผลทันที</p>
+    </div>
+
+    <!-- ลำดับ: คำถามเกี่ยวกับคุณ 5 ข้อ → ชื่อ/อีเมล (บันทึกลง Supabase ตาราง leads) → ควิซ 5 ข้อ → ผลไทป์ -->
+    <div class="qcard" id="quizPreview">
+      <div class="qmeta"><span id="qLabel">เกี่ยวกับคุณ</span><span id="qCount">ข้อ 1 / 6</span></div>
+      <div class="qbar"><i id="qBar" style="width:17%"></i></div>
+      <div id="qStage" aria-live="polite">
+        <h3>กำลังโหลดแบบทดสอบ...</h3>
+      </div>
+    </div>
+    <p class="note">* เวอร์ชันทดลอง คำถามควิซยังไม่ใช่ฉบับจริง</p>
+  </div>
+</main>
+
+<script src="quiz-data.js"></script>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ===== Supabase =====
+const SUPABASE_URL = 'https://xkbhhtauzqgvryeocmiz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_14U9zriQnKcTb7PSA97zMQ_g1DuzDy-';   // publishable key (ปลอดภัยที่จะอยู่ในหน้าเว็บ)
+
+const QUESTIONS = [
+  {key:'age_range', q:'ช่วงอายุของคุณ', two:true, opts:['ต่ำกว่า 30','30–35','36–40','41–45','46–50','51 ขึ้นไป','ไม่ระบุ']},
+  {key:'gender', q:'เพศ', opts:['หญิง','ชาย','ไม่ระบุ']},
+  {key:'stage', q:'ตอนนี้การสร้างตัวตนออนไลน์ของคุณอยู่ขั้นไหน', opts:['ยังไม่ได้เริ่ม','เริ่มแล้ว แต่ยังไม่ค่อยได้ผล','มีรายได้แล้ว อยากโตต่อ','ไม่ระบุ']},
+  {key:'pain', q:'เรื่องที่ติดอยู่มากที่สุด', opts:['ไม่รู้จะพูดอะไร','ไม่กล้าออกกล้อง','ไม่มีเวลา','ใช้ AI ไม่เป็น','ไม่ระบุ']},
+  {key:'platform', q:'แพลตฟอร์มหลักที่คุณใช้', two:true, opts:['Facebook','TikTok','Instagram','YouTube','LINE','ไม่ระบุ']},
+];
+const TOTAL = QUESTIONS.length + 1;   // คำถามเกี่ยวกับคุณ 5 ข้อ + หน้ากรอกชื่อ
+const answers = {};
+let step = 0;                           // ตำแหน่งในส่วน "เกี่ยวกับคุณ"
+let phase = 'about';                    // about (+ contact) → quiz → result
+let qi = 0;                             // ข้อที่เท่าไหร่ในควิซ
+const picks = [];                       // ไทป์ที่เลือกในแต่ละข้อ
+let result = null, leadName = '';
+
+// ที่มาจากโฆษณา (utm / fbclid ในลิงก์)
+const params = new URLSearchParams(location.search);
+const source = {};
+['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k=>{ if(params.get(k)) source[k]=params.get(k); });
+
+// เก็บทุกคำตอบแบบไม่ระบุตัวตน (ตาราง quiz_events) เพื่อดูว่าคนหยุดที่ข้อไหน
+// step: 0 เปิดหน้าควิซ, 1–5 ตอบข้อเกี่ยวกับคุณ, 6 ถึงหน้ากรอกชื่อ, 7 ส่งข้อมูลสำเร็จ
+const sbHeaders = () => Object.assign({apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
+  SUPABASE_KEY.startsWith('eyJ') ? {Authorization:`Bearer ${SUPABASE_KEY}`} : {});
+const SESSION = (crypto.randomUUID && crypto.randomUUID()) ||
+  ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c=>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+const tracked = new Set();
+function track(step, question, answer=null, once=false){
+  if(!SUPABASE_URL || !SUPABASE_KEY) return;
+  if(once){ if(tracked.has(question)) return; tracked.add(question); }
+  fetch(`${SUPABASE_URL}/rest/v1/quiz_events`, {
+    method:'POST', keepalive:true, headers:sbHeaders(),
+    body:JSON.stringify({session_id:SESSION, step, question, answer,
+      utm_source:source.utm_source || null, utm_campaign:source.utm_campaign || null})
+  }).catch(()=>{});   // ถ้าส่งไม่ได้ ไม่รบกวนลูกค้า
+}
+
+const stage = document.getElementById('qStage');
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function setProgress(label, n = Math.min(step+1,TOTAL), total = TOTAL){
+  document.getElementById('qLabel').textContent = label;
+  document.getElementById('qCount').textContent = n ? `ข้อ ${n} / ${total}` : '';
+  document.getElementById('qBar').style.width = `${(n || total)/total*100}%`;
+}
+
+// คลิกตัวเลือก: ไฮไลต์ แล้วไปต่อ
+function onPick(fn){
+  stage.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
+    stage.querySelectorAll('.opt').forEach(x=>{x.classList.toggle('sel',x===b);x.setAttribute('aria-checked',x===b)});
+    setTimeout(()=>fn(b.dataset.v), reduce?0:180);
+  }));
+}
+function onBack(fn){ const b = document.getElementById('qBack'); if(b) b.addEventListener('click', fn); }
+const toTop = () => document.getElementById('quizPreview').scrollIntoView({behavior:reduce?'auto':'smooth', block:'start'});
+
+function score(){
+  const n = Object.fromEntries(Object.keys(TYPES).map(k=>[k,0])), last = {};
+  picks.forEach((t,i)=>{ n[t]++; last[t]=i; });
+  const top = Object.keys(n).sort((a,b)=> n[b]-n[a] || (last[b]??-1)-(last[a]??-1))[0];
+  return {top, n};
+}
+
+// ----- 1) เกี่ยวกับคุณ 5 ข้อ -----
+function renderAbout(){
+  const Q = QUESTIONS[step];
+  setProgress('เกี่ยวกับคุณ');
+  stage.innerHTML = `
+    <div style="display:grid;gap:16px">
+      <h3>${esc(Q.q)}</h3>
+      <div class="opts${Q.two?' two':''}" role="radiogroup" aria-label="${esc(Q.q)}">
+        ${Q.opts.map(o=>`<button type="button" class="opt${answers[Q.key]===o?' sel':''}" role="radio" aria-checked="${answers[Q.key]===o}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}
+      </div>
+      <div class="qnav">${step>0?'<button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button>':'<span></span>'}<span class="draft">ทุกข้อเลือก "ไม่ระบุ" ได้</span></div>
+    </div>`;
+  onPick(v=>{
+    answers[Q.key] = v;
+    track(step + 1, Q.key, v);
+    step++; render();
+  });
+  onBack(()=>{ step--; render(); });
+}
+
+// ----- 2) ชื่อ / อีเมล -----
+function renderContact(){
+  setProgress('ข้อมูลติดต่อ');
+  track(QUESTIONS.length + 1, 'contact_form', null, true);
+  stage.innerHTML = `
+    <form id="leadForm" novalidate style="display:grid;gap:14px">
+      <h3>ฝากชื่อและอีเมลไว้ แล้วเริ่มควิซได้เลย</h3>
+      <p class="draft" style="font-style:normal">เราจะส่งผลฉบับเต็มของดาวประจำตัวคุณไปทางอีเมล</p>
+      <div class="field"><label for="f-name">ชื่อเล่น</label><input id="f-name" name="name" autocomplete="nickname" required value="${esc(leadName)}"></div>
+      <div class="field"><label for="f-email">อีเมล</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>
+      <div class="field"><label for="f-contact">LINE ID หรือเบอร์โทร <small>(ไม่บังคับ)</small></label><input id="f-contact" name="contact" autocomplete="tel"></div>
+      <label class="consent" for="f-consent"><input type="checkbox" id="f-consent" name="consent_data">ยินยอมให้ CoachMew Mastermind เก็บข้อมูลนี้ เพื่อส่งผลแบบทดสอบ และปรับปรุงบริการให้เหมาะกับคุณ</label>
+      <label class="consent" for="f-mkt"><input type="checkbox" id="f-mkt" name="consent_marketing">ยินดีรับข่าวสาร คอนเทนต์ และโปรโมชันจากโค้ชมิว <small>(ไม่บังคับ)</small></label>
+      <p class="err" id="f-err" hidden></p>
+      <div class="qnav"><button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button><button class="btn btn-main" type="submit" id="f-submit">เริ่มควิซ →</button></div>
+    </form>`;
+  document.getElementById('leadForm').addEventListener('submit', onSubmit);
+  onBack(()=>{ step--; render(); });
+}
+
+async function saveLead(row){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {method:'POST', headers:sbHeaders(), body:JSON.stringify(row)});
+  if(!res.ok) throw new Error(await res.text());
+}
+
+async function onSubmit(e){
+  e.preventDefault();
+  const f = e.target, err = document.getElementById('f-err');
+  const name = document.getElementById('f-name').value.trim(), email = f.email.value.trim();
+  const msg = !name ? 'กรุณากรอกชื่อเล่น'
+    : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'กรุณากรอกอีเมลให้ถูกต้อง เช่น name@gmail.com'
+    : !f.consent_data.checked ? 'กรุณาติ๊กยินยอมให้เก็บข้อมูล เพื่อให้เราส่งผลให้คุณได้'
+    : '';
+  if(msg){ err.textContent = msg; err.hidden = false; return; }
+  err.hidden = true;
+  const btn = document.getElementById('f-submit');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try{
+    await saveLead({
+      name, email, contact: f.contact.value.trim() || null,
+      ...answers,
+      consent_data: true, consent_marketing: f.consent_marketing.checked,
+      ...source
+    });
+    track(TOTAL + 1, 'submit', null, true);
+    leadName = name;
+    phase = 'quiz'; qi = 0; render(); toTop();
+  }catch(ex){
+    console.error(ex);
+    err.textContent = 'บันทึกไม่สำเร็จ ลองกดอีกครั้ง หรือทักไลน์โค้ชมิวได้เลย';
+    err.hidden = false; btn.disabled = false; btn.textContent = 'เริ่มควิซ →';
+  }
+}
+
+// ----- 3) ควิซ 5 ข้อ -----
+function renderQuiz(){
+  const Q = QUIZ[qi];
+  setProgress('Cosmic Identity', qi+1, QUIZ.length);
+  stage.innerHTML = `
+    <div style="display:grid;gap:16px">
+      <h3>${esc(Q.q)}</h3>
+      <div class="opts" role="radiogroup" aria-label="${esc(Q.q)}">
+        ${Q.opts.map(([t,txt])=>`<button type="button" class="opt${picks[qi]===t?' sel':''}" role="radio" aria-checked="${picks[qi]===t}" data-v="${t}">${esc(txt)}</button>`).join('')}
+      </div>
+      <div class="qnav">${qi>0?'<button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button>':'<span></span>'}<span class="draft">ไม่มีถูกผิด เลือกข้อที่ใกล้ตัวคุณที่สุด</span></div>
+    </div>`;
+  onPick(v=>{
+    picks[qi] = v;
+    if(qi < QUIZ.length-1) qi++;
+    else { result = score(); phase = 'result'; toTop(); }
+    render();
+  });
+  onBack(()=>{ qi--; render(); });
+}
+
+// ----- 4) ผล -----
+function renderResult(){
+  const T = TYPES[result.top];
+  setProgress('ผลของคุณ', 0, 1);
+  stage.innerHTML = `
+    <div class="res" style="--c:${T.c}">
+      <span class="ctype-ico" aria-hidden="true">${T.ico}</span>
+      <div><p class="res-kicker">คุณ${esc(leadName)} คือ</p><h3 class="res-name">${T.name}<small>${T.en}</small></h3></div>
+      <p class="res-tag">${T.tag}</p>
+      <div class="res-box"><p><b>จุดแข็ง</b>${T.good}</p><p><b>ระวัง</b>${T.watch}</p></div>
+      <div><p class="res-h">คอนเทนต์ที่เหมาะกับคุณ</p><ul class="res-list">${T.content.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+      <div><p class="res-h">ก้าวแรกที่ทำได้วันนี้</p><p class="first">${T.first}</p></div>
+      <div class="res-bars" aria-label="สัดส่วนคำตอบ">
+        ${Object.keys(TYPES).map(k=>`<div class="res-bar"><span>${TYPES[k].name}</span><i><b style="width:${result.n[k]/QUIZ.length*100}%;background:${TYPES[k].c}"></b></i><em>${result.n[k]}/${QUIZ.length}</em></div>`).join('')}
+      </div>
+      <p class="draft">ผลนี้ใช้สะท้อนตัวเอง ไม่ใช่แบบทดสอบทางจิตวิทยา · ผลฉบับเต็มจะส่งไปทางอีเมล</p>
+      <div class="res-cta">
+        <a class="btn btn-main" href="index.html#steps">ดู Coaching และคอร์ส</a>
+        <a class="btn btn-ghost" href="index.html#contact">คุยกับโค้ชมิว</a>
+      </div>
+      <button type="button" class="link-btn" id="qRetry">ทำควิซใหม่</button>
+    </div>`;
+  document.getElementById('qRetry').addEventListener('click',()=>{ phase='quiz'; qi=0; picks.length=0; render(); toTop(); });
+}
+
+function render(){
+  if(phase === 'quiz') return renderQuiz();
+  if(phase === 'result') return renderResult();
+  return step < QUESTIONS.length ? renderAbout() : renderContact();
+}
+render();
+track(0, 'view', null, true);   // มีคนเปิดหน้าควิซ
+</script>
+</body>
+</html>

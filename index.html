@@ -7,219 +7,8 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600&family=Montserrat:wght@400;500;600;700&family=Prompt:wght@200;300;400;500;600&display=swap">
-<style>
-/* Layout: champagne satin page, one dark cocoa band for the 3 steps, gold used only for lines, numbers and CTAs */
-:root{
-  --bg:#ffffff;          /* bright white */
-  --bg-2:#fbf7f1;        /* faint champagne for alternate sections */
-  --card:#ffffff;
-  --ink:#2e231b;         /* cocoa text */
-  --ink-soft:#6b5a4b;
-  --gold:#b08a4a;
-  --gold-2:#d8b878;
-  --line:rgba(176,138,74,.35);
-  --band:#f8f1e6;        /* light champagne band */
-  --band-ink:#2e231b;
-  --btn-ink:#fffaf3;
-  --err:#b3261e;
-  --f-script:"Prompt", "Anuphan", system-ui, sans-serif;   /* light-weight large accent */
-  --f-display:"Montserrat", "Prompt", system-ui, sans-serif;
-  --f-head:"Prompt", "Montserrat", system-ui, sans-serif;
-  --f-body:"Anuphan", "Noto Sans Thai", system-ui, sans-serif;
-  --r:18px;
-  --wrap:1120px;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#1c1511;--bg-2:#251c16;--card:#2a2019;--ink:#f3e7d6;--ink-soft:#c3b19c;
-  --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;--err:#f2b8b5;color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#1c1511;--bg-2:#251c16;--card:#2a2019;--ink:#f3e7d6;--ink-soft:#c3b19c;
-  --gold:#d6b071;--gold-2:#e8cc93;--line:rgba(214,176,113,.3);--band:#120d0a;--band-ink:#f3e7d6;--btn-ink:#1c1511;--err:#f2b8b5;color-scheme:dark}
-
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;
-}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-a{color:inherit}
-h1,h2,h3{font-family:var(--f-head);font-weight:600;line-height:1.35;text-wrap:balance;margin:0}
-p{margin:0}
-.wrap{max-width:var(--wrap);margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-section{padding-block:88px}
-.eyebrow{font-family:var(--f-display);font-size:14px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:600}
-.script{font-family:var(--f-script);color:var(--gold);font-weight:300;letter-spacing:-.01em}
-.quote,.rotator{font-weight:300}
-h1,h2,h3{letter-spacing:-.01em}
-.lead{color:var(--ink-soft);max-width:62ch}
-.sec-head{display:grid;gap:12px;margin-bottom:44px}
-.sec-head h2{font-size:clamp(26px,3.6vw,38px)}
-.center{text-align:center;justify-items:center}
-
-.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:999px;font-weight:500;text-decoration:none;font-family:var(--f-body);font-size:15px;border:1px solid var(--gold);cursor:pointer;transition:transform .2s, background .2s}
-.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.btn-gold{background:linear-gradient(135deg,var(--gold-2),var(--gold));color:var(--btn-ink);border-color:transparent;box-shadow:0 6px 20px rgba(176,138,74,.28)}
-.btn-gold:hover{transform:translateY(-2px)}
-.btn-ghost{background:transparent;color:var(--ink)}
-.btn-ghost:hover{background:var(--card)}
-
-/* Nav */
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-mark{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--gold);display:grid;place-items:center;font-family:var(--f-display);font-weight:600;color:var(--gold);font-size:16px}
-.logo-txt{display:grid;line-height:1.1}
-.logo-txt b{font-family:var(--f-display);font-size:18px;font-weight:700;letter-spacing:.01em}
-.logo-txt small{font-family:var(--f-display);font-size:10px;letter-spacing:.3em;color:var(--gold)}
-.menu{display:flex;gap:26px;list-style:none;margin:0;padding:0}
-.menu a{text-decoration:none;font-size:15px;color:var(--ink-soft)}
-.menu a:hover{color:var(--gold)}
-.nav-cta{padding:9px 20px}
-.burger{display:none;background:none;border:1px solid var(--line);border-radius:10px;width:42px;height:42px;color:var(--ink);font-size:20px;cursor:pointer}
-@media (max-width:860px){
-  .menu{display:none;position:absolute;top:68px;left:0;right:0;flex-direction:column;gap:0;background:var(--card);border-bottom:1px solid var(--line);padding:8px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
-  .menu.open{display:flex}
-  .menu a{display:block;padding:12px 0;border-bottom:1px solid var(--line)}
-  .burger{display:block}
-  .nav-cta{display:none}
-}
-
-/* Hero */
-.hero{padding-block:72px 40px}
-.hero-grid{display:grid;gap:28px;justify-items:center;text-align:center}
-.hero .tag{font-size:clamp(34px,6vw,64px);line-height:1.3}
-.hero h1{font-size:clamp(22px,3vw,32px);font-weight:500}
-.hero h1 em{font-style:normal;font-family:var(--f-display);font-size:1.25em;color:var(--gold);font-weight:600}
-.hero .lead{text-align:center}
-.cta-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-.banner{margin-top:40px;border-radius:24px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 60px -30px rgba(58,42,31,.45);max-width:100%}
-.banner img{display:block;width:100%;height:auto}
-.start{margin-top:28px;font-family:var(--f-display);letter-spacing:.3em;font-size:12px;color:var(--gold);display:grid;justify-items:center;gap:4px;text-decoration:none}
-.start span{animation:bob 2s ease-in-out infinite}
-@keyframes bob{50%{transform:translateY(5px)}}
-
-/* Stats */
-.stats{padding-block:24px 0}
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.stat{padding:26px 16px;text-align:center;display:grid;gap:2px}
-.stat+.stat{border-left:1px solid var(--line)}
-.stat b{font-family:var(--f-display);font-size:clamp(30px,4vw,44px);color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
-.stat span{font-size:14px;color:var(--ink-soft)}
-@media (max-width:600px){.stat-row{grid-template-columns:1fr}.stat+.stat{border-left:0;border-top:1px solid var(--line)}}
-
-/* Steps band */
-.band{background:var(--band);color:var(--band-ink)}
-.band .lead{color:color-mix(in srgb,var(--band-ink) 72%,transparent)}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-@media (max-width:900px){.steps{grid-template-columns:1fr}}
-.step{border:1px solid var(--line);border-radius:var(--r);padding:28px;display:grid;gap:14px;align-content:start;background:var(--card);min-width:0;box-shadow:0 18px 40px -30px rgba(176,138,74,.5)}
-.step-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.step-num{font-family:var(--f-display);color:var(--gold);letter-spacing:.2em;font-size:13px;font-weight:600}
-.pill{font-size:12px;padding:3px 12px;border-radius:999px;border:1px solid var(--line);color:var(--gold)}
-.step h3{font-family:var(--f-display);font-size:28px;font-weight:600;letter-spacing:.02em;line-height:1.15;color:var(--band-ink)}
-.step h3 small{display:block;font-family:var(--f-head);font-size:16px;font-weight:500;color:var(--gold);margin-top:6px;letter-spacing:0}
-.step p{font-size:15px;color:var(--ink-soft)}
-.step .btn{justify-self:start;margin-top:6px}
-.step .btn-ghost{color:var(--ink);border-color:var(--gold)}
-.step .btn-ghost:hover{background:var(--bg-2)}
-.soon{font-size:11px;letter-spacing:.12em;background:var(--gold);color:var(--btn-ink);padding:2px 10px;border-radius:999px;font-weight:600}
-
-/* About */
-.about-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:center}
-@media (max-width:860px){.about-grid{grid-template-columns:1fr;gap:32px}}
-.portrait{aspect-ratio:4/5;max-width:100%;border-radius:200px 200px var(--r) var(--r);border:1px solid var(--line);background:linear-gradient(160deg,var(--card),var(--bg-2));display:grid;place-items:center;text-align:center;color:var(--ink-soft);font-size:14px;padding:24px;position:relative;overflow:hidden}
-.portrait::after{content:"";position:absolute;inset:14px;border-radius:186px 186px 10px 10px;border:1px solid var(--line)}
-.quote{font-family:var(--f-script);font-size:clamp(24px,3.2vw,34px);line-height:1.6;color:var(--ink)}
-.quote-by{margin-top:14px;font-size:14px;color:var(--ink-soft)}
-.quote-by b{color:var(--ink);font-weight:600}
-.about-body{display:grid;gap:18px}
-.about-body p{color:var(--ink-soft)}
-
-/* Rotating promise */
-.promise{text-align:center}
-.promise h2{font-size:clamp(22px,3vw,30px);font-weight:500}
-.rotator{display:block;margin-top:14px;font-family:var(--f-script);font-size:clamp(30px,5vw,52px);color:var(--gold);min-height:1.6em;transition:opacity .4s}
-
-/* Quiz preview */
-.quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
-@media (max-width:860px){.quiz-grid{grid-template-columns:1fr}}
-.qcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:grid;gap:18px;min-width:0}
-.qmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
-.qbar{height:4px;background:var(--bg-2);border-radius:4px;overflow:hidden}
-.qbar i{display:block;height:100%;width:21%;background:linear-gradient(90deg,var(--gold-2),var(--gold))}
-.qcard h3{font-size:20px}
-.opts{display:grid;gap:10px}
-.opt{display:flex;gap:12px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:15px;text-align:left;color:var(--ink);font-family:var(--f-body);cursor:pointer}
-.opt:hover,.opt:focus-visible{border-color:var(--gold);outline:none}
-.opt.sel{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--bg))}
-.opt b{font-family:var(--f-display);color:var(--gold);width:18px}
-.opts.two{grid-template-columns:1fr 1fr}
-@media (max-width:420px){.opts.two{grid-template-columns:1fr}}
-.field{display:grid;gap:6px}
-.field label{font-size:14px;font-weight:500}
-.field label small{color:var(--ink-soft);font-weight:400}
-.field input{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;width:100%}
-.field input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
-.consent{display:flex;gap:10px;font-size:13px;line-height:1.6;color:var(--ink-soft);align-items:flex-start;cursor:pointer}
-.consent input{margin-top:4px;accent-color:var(--gold);flex:none;width:16px;height:16px}
-.qnav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.link-btn{background:none;border:0;color:var(--ink-soft);font:inherit;font-size:14px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
-.link-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.err{color:var(--err);font-size:13px;margin:0}
-.done{text-align:center;display:grid;gap:12px;justify-items:center;padding-block:12px}
-.done .tick{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 15%,var(--card));color:var(--gold);font-size:26px}
-.draft{font-size:12px;color:var(--ink-soft);font-style:italic}
-.types{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
-@media (max-width:520px){.types{grid-template-columns:repeat(2,1fr)}}
-.type{padding:14px 10px;border:1px solid var(--line);border-radius:12px;text-align:center;font-size:14px;display:grid;gap:2px}
-.type b{font-family:var(--f-display);font-size:13px;letter-spacing:.08em;color:var(--gold);font-weight:600}
-.checks{list-style:none;padding:0;margin:20px 0 26px;display:grid;gap:10px}
-.checks li{display:flex;gap:10px;color:var(--ink-soft)}
-.checks li::before{content:"✦";color:var(--gold);flex:none}
-
-/* Pricing */
-.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
-@media (max-width:900px){.prices{grid-template-columns:1fr}}
-.price{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px;display:grid;gap:14px;align-content:start;position:relative}
-.price.hot{border:1.5px solid var(--gold);box-shadow:0 20px 50px -28px rgba(176,138,74,.6)}
-.price .flag{position:absolute;top:-13px;left:30px;background:var(--gold);color:var(--btn-ink);font-size:12px;padding:3px 14px;border-radius:999px}
-.price h3{font-family:var(--f-display);font-size:24px;letter-spacing:.03em}
-.price .for{font-size:14px;color:var(--ink-soft)}
-.amount{font-family:var(--f-display);font-size:42px;font-weight:600;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
-.amount small{font-family:var(--f-body);font-size:13px;color:var(--ink-soft);font-weight:400;margin-left:6px}
-.price ul{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:14px;color:var(--ink-soft)}
-.price li{display:flex;gap:8px}
-.price li::before{content:"—";color:var(--gold)}
-.price .btn{justify-self:start;margin-top:8px}
-
-/* Reviews */
-.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-@media (max-width:900px){.reviews{grid-template-columns:1fr}}
-.review{border-top:1px solid var(--gold);padding-top:20px;display:grid;gap:12px}
-.review p{font-family:var(--f-head);font-size:17px;font-weight:500}
-.review span{font-size:13px;color:var(--ink-soft)}
-
-/* FAQ */
-.faq{max-width:780px;margin:0 auto;display:grid}
-details{border-bottom:1px solid var(--line);padding:18px 4px}
-summary{cursor:pointer;font-family:var(--f-head);font-size:17px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:16px}
-summary::-webkit-details-marker{display:none}
-summary::after{content:"+";color:var(--gold);font-size:22px;line-height:1}
-details[open] summary::after{content:"−"}
-details p{margin-top:10px;color:var(--ink-soft)}
-summary:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
-
-/* Final CTA + footer */
-.final{text-align:center;display:grid;gap:18px;justify-items:center}
-.final .script{font-size:clamp(34px,5vw,56px);line-height:1.3}
-footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:var(--ink-soft)}
-.foot{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
-.foot ul{display:flex;gap:18px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
-.foot a{text-decoration:none}
-.foot a:hover{color:var(--gold)}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@200;300;400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -231,11 +20,12 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
     </a>
     <ul class="menu" id="menu">
       <li><a href="#steps">บริการ</a></li>
+      <li><a href="#types">4 ไทป์ดาว</a></li>
       <li><a href="#about">รู้จักโค้ชมิว</a></li>
-      <li><a href="#quiz">แบบทดสอบ</a></li>
+      <li><a href="quiz.html">แบบทดสอบ</a></li>
       <li><a href="#faq">คำถามที่พบบ่อย</a></li>
     </ul>
-    <a class="btn btn-gold nav-cta" href="#quiz">ทำแบบทดสอบ</a>
+    <a class="btn btn-main nav-cta" href="quiz.html">ทำแบบทดสอบ</a>
     <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
   </div>
 </header>
@@ -245,12 +35,12 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
   <section class="hero">
     <div class="wrap">
       <div class="hero-grid">
-        <span class="eyebrow">Personal Branding for Modern Moms</span>
-        <p class="tag script">ถึงตาคุณแล้ว ที่จะเป็นตัวเอง</p>
-        <h1>สร้างตัวตนที่ชัดเจน จริงใจ และใช้ AI เป็นผู้ช่วย<br>ในแบบ <em>คุณแม่ยุค AI</em></h1>
-        <p class="lead">โค้ชมิวช่วยคุณค้นหาจุดเด่นของตัวเอง วางทิศทางแบรนด์ส่วนตัว และสื่อสารได้อย่างต่อเนื่อง โดยไม่ต้องเป็นใครอื่น</p>
+        <span class="eyebrow">Personal Branding · เพื่อนร่วมทางในการสร้างตัวตน</span>
+        <p class="tag script">ค้นพบตัวตน<br>สร้างแบรนด์ในแบบที่เป็นคุณ</p>
+        <h1>สำหรับเจ้าของธุรกิจ คนทำงาน และครีเอเตอร์มือใหม่<br>ที่อยากสื่อสารตัวเองให้ชัด โดยมี <em>AI</em> เป็นผู้ช่วย</h1>
+        <p class="lead">เริ่มจากรู้ว่าคุณเป็นดาวดวงไหนใน 4 Cosmic Identity แล้วโค้ชมิวจะช่วยวางทิศทางแบรนด์และคอนเทนต์ที่เป็นตัวคุณจริงๆ</p>
         <div class="cta-row">
-          <a class="btn btn-gold" href="#quiz">เริ่มค้นหาตัวตนฟรี</a>
+          <a class="btn btn-main" href="quiz.html">ทดลอง Cosmic Identity ฟรี</a>
           <a class="btn btn-ghost" href="#steps">ดูวิธีการทำงาน</a>
         </div>
       </div>
@@ -281,22 +71,21 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
       </div>
       <div class="steps">
         <article class="step">
-          <div class="step-top"><span class="step-num">STEP 01</span><span class="pill">≈ 5 นาที</span></div>
-          <h3>PERSONAL TYPE<small>รู้จักตัวตนของคุณ</small></h3>
-          <p>แบบทดสอบที่ช่วยถอดคาแรกเตอร์ จุดแข็ง และสไตล์การสื่อสารที่เป็นธรรมชาติของคุณ เพื่อรู้ว่าควรเล่าเรื่องแบบไหนให้คนจำได้</p>
-          <span><span class="soon">เร็วๆ นี้</span></span>
-          <a class="btn btn-gold" href="#quiz">ลองดูตัวอย่าง</a>
+          <div class="step-top"><span class="step-num">STEP 01</span><span class="pill">ฟรี · 2–3 นาที</span></div>
+          <h3>COSMIC IDENTITY<small>รู้ว่าคุณเป็นดาวดวงไหน</small></h3>
+          <p>คำถามแบบสถานการณ์ ไม่มีถูกผิด รู้ผลทันที ช่วยให้เห็นจุดแข็ง สิ่งที่ควรระวัง และสไตล์คอนเทนต์ที่เป็นธรรมชาติของคุณ</p>
+          <a class="btn btn-main" href="quiz.html">ทำแบบทดสอบฟรี</a>
         </article>
         <article class="step">
-          <div class="step-top"><span class="step-num">STEP 02</span><span class="pill">1:1 · 60–90 นาที</span></div>
-          <h3>BRAND BLUEPRINT<small>วางแผนที่ตัวตน</small></h3>
-          <p>นั่งคุยกับโค้ชมิวตัวต่อตัว เพื่อกำหนดจุดยืน กลุ่มเป้าหมาย น้ำเสียงในการสื่อสาร และเสาหลักคอนเทนต์ สรุปเป็นเล่มแผนที่นำไปใช้ได้ทันที</p>
+          <div class="step-top"><span class="step-num">STEP 02</span><span class="pill">1:1 กับโค้ชมิว</span></div>
+          <h3>COACHING<small>วางทิศทางแบรนด์ให้ชัด</small></h3>
+          <p>คุยกับโค้ชมิวตัวต่อตัว ตั้งแต่ Self-Discovery, Brand Clarity, Audience Direction จนได้ Action Plan ที่ลงมือได้ทันที</p>
           <a class="btn btn-ghost" href="#contact">สอบถามโค้ชมิว</a>
         </article>
         <article class="step">
-          <div class="step-top"><span class="step-num">STEP 03</span><span class="pill">รายเดือน</span></div>
-          <h3>MASTERMIND<small>เดินไปด้วยกันอย่างต่อเนื่อง</small></h3>
-          <p>กลุ่มเพื่อนร่วมทางที่เจอกันทุกเดือน พร้อมเวิร์กช็อปใช้ AI ช่วยคิดคอนเทนต์ เขียนแคปชัน และตัดคลิป ให้คุณลงมือได้สม่ำเสมอโดยไม่ต้องเริ่มจากศูนย์</p>
+          <div class="step-top"><span class="step-num">STEP 03</span><span class="pill">เรียนตามจังหวะตัวเอง</span></div>
+          <h3>ONLINE COURSE<small>ลงมือสร้างด้วย AI</small></h3>
+          <p>3 ช่วง Discover → Plan, Create → Produce, Present → Grow พร้อม Workbook ใช้ AI ช่วยคิดคอนเทนต์ ทำภาพ และตัดต่อ</p>
           <a class="btn btn-ghost" href="#contact">สอบถามโค้ชมิว</a>
         </article>
       </div>
@@ -309,9 +98,9 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
       <div class="portrait">ใส่รูปโค้ชมิว<br>(แนวตั้ง 4:5)</div>
       <div class="about-body">
         <span class="eyebrow">About CoachMew</span>
-        <p class="quote">"แม่ทุกคนมีเรื่องราวที่มีค่า<br>แค่ต้องมีคนช่วยให้เห็นมัน"</p>
+        <p class="quote">"ทุกคนมีเรื่องราวที่มีค่า<br>แค่ต้องมีคนช่วยให้เห็นมัน"</p>
         <p class="quote-by"><b>โค้ชมิว</b> · ผู้ก่อตั้ง CoachMew Mastermind</p>
-        <p>CoachMew Mastermind คือพื้นที่สำหรับผู้หญิงและคุณแม่ที่อยากสร้างตัวตนบนโลกออนไลน์ ทั้งเพื่ออาชีพ ธุรกิจ หรือเพื่อเป็นแรงบันดาลใจให้คนอื่น เราเชื่อว่าแบรนด์ที่ยั่งยืนเริ่มจากความจริงใจ และความสม่ำเสมอ</p>
+        <p>CoachMew Mastermind คือเพื่อนร่วมทางสำหรับเจ้าของธุรกิจ คนทำงาน และครีเอเตอร์มือใหม่ ที่มีของดีอยู่แล้ว แต่ยังไม่รู้จะสื่อสารความเป็นตัวเองออกไปยังไง เราเชื่อว่าแบรนด์ที่ยั่งยืนเริ่มจากความจริงใจ และความสม่ำเสมอ</p>
         <p>ในยุคที่ AI ทำให้ทุกคนสร้างคอนเทนต์ได้ สิ่งที่ทำให้คุณแตกต่างคือ "ตัวคุณ" โค้ชมิวจะช่วยให้คุณเห็นตัวเองชัดขึ้น แล้วใช้เครื่องมือใหม่ๆ ช่วยเล่าเรื่องนั้นอย่างมั่นใจ</p>
         <!-- TODO: ใส่ประวัติ/ผลงานโค้ชมิว -->
       </div>
@@ -326,42 +115,29 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
     </div>
   </section>
 
-  <!-- QUIZ PREVIEW -->
-  <section id="quiz" style="background:var(--bg-2)">
-    <div class="wrap quiz-grid">
-      <div>
-        <div class="sec-head" style="margin-bottom:0">
-          <span class="eyebrow">Step 01 · Personal Type Test</span>
-          <h2>คุณเป็นแบรนด์ส่วนตัว<br>แบบไหน?</h2>
-          <p class="lead">เริ่มจากตอบคำถามเกี่ยวกับตัวคุณ 5 ข้อ แล้วฝากชื่อกับอีเมลไว้ เมื่อแบบทดสอบ Personal Type เปิดเต็มรูปแบบ เราจะส่งลิงก์ให้คุณทำก่อนใคร พร้อมผลวิเคราะห์ว่าควรสื่อสารอย่างไรให้เป็นตัวเอง</p>
-        </div>
-        <ul class="checks">
-          <li>รู้จุดแข็งและเสน่ห์ที่คนอื่นจะจำคุณได้</li>
-          <li>รู้สไตล์คอนเทนต์และน้ำเสียงที่เหมาะกับคุณ</li>
-          <li>รู้สิ่งที่ควรระวัง เพื่อไม่ให้ตัวตนหลุดจากตัวจริง</li>
-        </ul>
-        <button class="btn btn-gold" type="button" id="quizStart">เริ่มเลย ใช้เวลา 1 นาที</button>
-        <div class="types" aria-label="ตัวอย่าง Personal Type">
-          <div class="type"><b>THE GUIDE</b>ผู้นำทาง</div>
-          <div class="type"><b>STORYTELLER</b>นักเล่าเรื่อง</div>
-          <div class="type"><b>NURTURER</b>ผู้โอบอุ้ม</div>
-          <div class="type"><b>EXPERT</b>ผู้เชี่ยวชาญ</div>
-          <div class="type"><b>CREATOR</b>นักสร้างสรรค์</div>
-          <div class="type"><b>INSPIRER</b>ผู้จุดประกาย</div>
-          <div class="type"><b>FRIEND</b>เพื่อนคู่คิด</div>
-          <div class="type"><b>PIONEER</b>ผู้บุกเบิก</div>
-        </div>
-        <p class="draft" style="margin-top:8px">* ชื่อ Type เป็นตัวอย่าง รอเนื้อหาจริงของแบบทดสอบ</p>
+  <!-- 4 COSMIC IDENTITY TYPES ตาม blueprint (สร้างจาก JS ตัวแปร TYPES ด้านล่าง แก้ชื่อ/ข้อความที่นั่นที่เดียว) -->
+  <section id="types">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">4 Cosmic Identity Types</span>
+        <h2>ทุกคนมีดาวประจำตัว ที่บอกว่าคุณสื่อสารแบบไหนได้ดีที่สุด</h2>
       </div>
+      <div class="cosmic" id="typeCards"></div>
+    </div>
+  </section>
 
-      <!-- ฟอร์มเก็บข้อมูลลูกค้า: คำถาม 4 ข้อ + ชื่อ/อีเมล (บันทึกลง Supabase ตาราง leads) -->
-      <div class="qcard" id="quizPreview">
-        <div class="qmeta"><span id="qLabel">เกี่ยวกับคุณ</span><span id="qCount">ข้อ 1 / 5</span></div>
-        <div class="qbar"><i id="qBar" style="width:20%"></i></div>
-        <div id="qStage" aria-live="polite">
-          <h3>ช่วงอายุของคุณ</h3>
-        </div>
-      </div>
+  <!-- QUIZ CTA: ตัวแบบทดสอบอยู่ที่หน้า quiz.html -->
+  <section id="quiz" style="background:var(--bg-2)">
+    <div class="wrap final">
+      <span class="eyebrow">Step 01 · Cosmic Identity</span>
+      <h2 class="sec-head" style="margin:0;font-size:clamp(26px,3.6vw,38px)">คุณเป็นดาวดวงไหน?</h2>
+      <p class="lead">ตอบ 5 สถานการณ์ ใช้เวลาไม่ถึง 2 นาที รู้ผลทันทีว่าคุณเป็นดาวดวงไหนใน 4 Cosmic Identity และควรเริ่มสื่อสารตัวเองยังไง</p>
+      <ul class="checks checks-row">
+        <li>รู้จุดแข็งที่คนอื่นจะจำคุณได้</li>
+        <li>รู้คอนเทนต์ที่เหมาะกับคุณ</li>
+        <li>รู้ก้าวแรกที่ทำได้วันนี้</li>
+      </ul>
+      <a class="btn btn-main" href="quiz.html">เริ่มทำแบบทดสอบ</a>
     </div>
   </section>
 
@@ -379,11 +155,11 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
           <p class="for">เหมาะกับ: คนที่ยังไม่แน่ใจว่าตัวเองควรมีคาแรกเตอร์แบบไหน</p>
           <div class="amount">ฟรี<small>ผลเบื้องต้น</small></div>
           <ul>
-            <li>ผล Personal Type ของคุณ</li>
+            <li>ผล Cosmic Identity เชิงลึก</li>
             <li>จุดแข็งและสิ่งที่ควรระวัง</li>
             <li>รายงานฉบับเต็ม (ตัวเลือกเสริม)</li>
           </ul>
-          <a class="btn btn-ghost" href="#quiz">เริ่มทำแบบทดสอบ</a>
+          <a class="btn btn-ghost" href="quiz.html">เริ่มทำแบบทดสอบ</a>
         </article>
         <article class="price hot">
           <span class="flag">แนะนำ</span>
@@ -396,7 +172,7 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
             <li>เสาหลักคอนเทนต์ + แผนคอนเทนต์ 30 วัน</li>
             <li>สรุปเป็นเล่ม Blueprint ส่วนตัว</li>
           </ul>
-          <a class="btn btn-gold" href="#contact">จองคิวโค้ช</a>
+          <a class="btn btn-main" href="#contact">จองคิวโค้ช</a>
         </article>
         <article class="price">
           <h3>MASTERMIND</h3>
@@ -435,9 +211,9 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
     <div class="wrap">
       <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>คำถามที่พบบ่อย</h2></div>
       <div class="faq">
-        <details><summary>ไม่เคยทำคอนเทนต์มาก่อนเลย เริ่มได้ไหม?</summary><p>ได้ค่ะ แนะนำให้เริ่มจากแบบทดสอบ Personal Type เพื่อดูว่าตัวเองถนัดสื่อสารแบบไหน แล้วค่อยต่อยอดใน Blueprint</p></details>
-        <details><summary>ต้องใช้ AI เป็นก่อนไหม?</summary><p>ไม่จำเป็นค่ะ ใน Mastermind จะสอนตั้งแต่พื้นฐาน ใช้เครื่องมือที่คุณแม่ใช้ได้จริงในชีวิตประจำวัน</p></details>
-        <details><summary>Blueprint ใช้เวลานานแค่ไหน?</summary><p>เซสชันประมาณ 60–90 นาที และได้รับเล่มสรุปภายในระยะเวลาที่กำหนด (รอระบุ)</p></details>
+        <details><summary>ไม่เคยทำคอนเทนต์มาก่อนเลย เริ่มได้ไหม?</summary><p>ได้ค่ะ แนะนำให้เริ่มจาก Cosmic Identity Quiz เพื่อดูว่าตัวเองถนัดสื่อสารแบบไหน แล้วค่อยต่อยอดด้วย Coaching หรือคอร์สออนไลน์</p></details>
+        <details><summary>ต้องใช้ AI เป็นก่อนไหม?</summary><p>ไม่จำเป็นค่ะ ในคอร์สจะสอนตั้งแต่พื้นฐาน ใช้เครื่องมือที่ใช้ได้จริงในชีวิตประจำวัน AI เป็นแค่ผู้ช่วย ตัวคุณคือหัวใจของแบรนด์</p></details>
+        <details><summary>Coaching กับคอร์สออนไลน์ต่างกันยังไง?</summary><p>คอร์สออนไลน์เรียนเองตามจังหวะของคุณ ส่วน Coaching ได้คุยกับโค้ชมิวตัวต่อตัวเพื่อวางทิศทางให้ชัด พร้อมได้คอร์สด้วย รายละเอียดและราคาจะประกาศเร็วๆ นี้</p></details>
         <details><summary>ชำระเงินและติดต่อได้ทางไหน?</summary><p>รอใส่ช่องทางชำระเงินและช่องทางติดต่อ เช่น LINE OA หรือ Facebook Page</p></details>
       </div>
     </div>
@@ -450,7 +226,7 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
       <p class="script">พร้อมเป็นตัวเองแล้วหรือยัง?</p>
       <p class="lead">เริ่มจากแบบทดสอบสั้นๆ หรือทักมาคุยกับโค้ชมิวได้เลย</p>
       <div class="cta-row">
-        <a class="btn btn-gold" href="#quiz">ทำแบบทดสอบ</a>
+        <a class="btn btn-main" href="quiz.html">ทำแบบทดสอบ</a>
         <a class="btn btn-ghost" href="#contact">ทัก LINE โค้ชมิว</a>
       </div>
     </div>
@@ -462,12 +238,13 @@ footer{border-top:1px solid var(--line);padding-block:36px;font-size:14px;color:
     <span>© 2026 CoachMew Mastermind</span>
     <ul>
       <li><a href="#steps">บริการ</a></li>
-      <li><a href="#quiz">แบบทดสอบ</a></li>
+      <li><a href="quiz.html">แบบทดสอบ</a></li>
       <li><a href="#faq">FAQ</a></li>
     </ul>
   </div>
 </footer>
 
+<script src="quiz-data.js"></script>
 <script>
 // Mobile menu
 const burger=document.getElementById('burger'),menu=document.getElementById('menu');
@@ -488,145 +265,6 @@ document.querySelectorAll('[data-count]').forEach(el=>{
 const sets=['ค้นพบตัวตน · วางทิศทาง · สื่อสารอย่างมั่นใจ','เข้าใจตัวเอง · ออกแบบจุดยืน · เติบโตในแบบของคุณ','มองเห็นเรื่องราว · ใช้ AI เป็นผู้ช่วย · เป็นตัวเองอย่างสม่ำเสมอ'];
 const rot=document.getElementById('rotator');let ri=0;
 if(!reduce)setInterval(()=>{rot.style.opacity=0;setTimeout(()=>{ri=(ri+1)%sets.length;rot.textContent=sets[ri];rot.style.opacity=1},400)},3200);
-
-// ===== Lead form =====
-// ใส่ค่าจาก Supabase (Project Settings → API) ตรงนี้ ถ้าเว้นว่าง ฟอร์มจะทำงานแต่ไม่ส่งข้อมูลไปไหน
-const SUPABASE_URL = 'https://xkbhhtauzqgvryeocmiz.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_14U9zriQnKcTb7PSA97zMQ_g1DuzDy-';   // publishable key (ปลอดภัยที่จะอยู่ในหน้าเว็บ)
-
-const QUESTIONS = [
-  {key:'age_range', q:'ช่วงอายุของคุณ', two:true, opts:['18–24','25–34','35–44','45–54','55 ขึ้นไป','ไม่ระบุ']},
-  {key:'gender', q:'เพศ', opts:['หญิง','ชาย','ไม่ระบุ']},
-  {key:'stage', q:'ตอนนี้การสร้างตัวตนออนไลน์ของคุณอยู่ขั้นไหน', opts:['ยังไม่ได้เริ่ม','เริ่มแล้ว แต่ยังไม่ค่อยได้ผล','มีรายได้แล้ว อยากโตต่อ','ไม่ระบุ']},
-  {key:'pain', q:'เรื่องที่ติดอยู่มากที่สุด', opts:['ไม่รู้จะพูดอะไร','ไม่กล้าออกกล้อง','ไม่มีเวลา','ใช้ AI ไม่เป็น','ไม่ระบุ']},
-  {key:'platform', q:'แพลตฟอร์มหลักที่คุณใช้', two:true, opts:['Facebook','TikTok','Instagram','YouTube','LINE','ไม่ระบุ']},
-];
-const TOTAL = QUESTIONS.length + 1;
-const answers = {};
-let step = 0;
-
-// ที่มาจากโฆษณา (utm / fbclid ในลิงก์)
-const params = new URLSearchParams(location.search);
-const source = {};
-['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k=>{ if(params.get(k)) source[k]=params.get(k); });
-
-// เก็บทุกคำตอบแบบไม่ระบุตัวตน (ตาราง quiz_events) เพื่อดูว่าคนหยุดที่ข้อไหน
-// step: 0 เห็นฟอร์ม, 1–5 ตอบข้อนั้น, 6 ถึงหน้ากรอกชื่อ, 7 ส่งสำเร็จ
-const sbHeaders = () => Object.assign({apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
-  SUPABASE_KEY.startsWith('eyJ') ? {Authorization:`Bearer ${SUPABASE_KEY}`} : {});
-const SESSION = (crypto.randomUUID && crypto.randomUUID()) ||
-  ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c=>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
-const tracked = new Set();
-function track(step, question, answer=null, once=false){
-  if(!SUPABASE_URL || !SUPABASE_KEY) return;
-  if(once){ if(tracked.has(question)) return; tracked.add(question); }
-  fetch(`${SUPABASE_URL}/rest/v1/quiz_events`, {
-    method:'POST', keepalive:true, headers:sbHeaders(),
-    body:JSON.stringify({session_id:SESSION, step, question, answer,
-      utm_source:source.utm_source || null, utm_campaign:source.utm_campaign || null})
-  }).catch(()=>{});   // ถ้าส่งไม่ได้ ไม่รบกวนลูกค้า
-}
-
-const stage = document.getElementById('qStage');
-const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-function setProgress(label){
-  document.getElementById('qLabel').textContent = label;
-  document.getElementById('qCount').textContent = `ข้อ ${Math.min(step+1,TOTAL)} / ${TOTAL}`;
-  document.getElementById('qBar').style.width = `${Math.min(step+1,TOTAL)/TOTAL*100}%`;
-}
-
-function render(){
-  if(step < QUESTIONS.length){
-    const Q = QUESTIONS[step];
-    setProgress('เกี่ยวกับคุณ');
-    stage.innerHTML = `
-      <div style="display:grid;gap:16px">
-        <h3>${esc(Q.q)}</h3>
-        <div class="opts${Q.two?' two':''}" role="radiogroup" aria-label="${esc(Q.q)}">
-          ${Q.opts.map(o=>`<button type="button" class="opt${answers[Q.key]===o?' sel':''}" role="radio" aria-checked="${answers[Q.key]===o}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}
-        </div>
-        <div class="qnav">${step>0?'<button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button>':'<span></span>'}<span class="draft">ทุกข้อเลือก "ไม่ระบุ" ได้</span></div>
-      </div>`;
-    stage.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
-      answers[Q.key] = b.dataset.v;
-      track(step + 1, Q.key, b.dataset.v);
-      stage.querySelectorAll('.opt').forEach(x=>{x.classList.toggle('sel',x===b);x.setAttribute('aria-checked',x===b)});
-      setTimeout(()=>{step++;render()}, reduce?0:180);
-    }));
-  } else {
-    setProgress('ข้อมูลติดต่อ');
-    track(QUESTIONS.length + 1, 'contact_form', null, true);
-    stage.innerHTML = `
-      <form id="leadForm" novalidate style="display:grid;gap:14px">
-        <h3>ฝากข้อมูลไว้ เราจะส่งผลแบบทดสอบให้คุณ</h3>
-        <div class="field"><label for="f-name">ชื่อเล่น</label><input id="f-name" name="name" autocomplete="nickname" required></div>
-        <div class="field"><label for="f-email">อีเมล</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>
-        <div class="field"><label for="f-contact">LINE ID หรือเบอร์โทร <small>(ไม่บังคับ)</small></label><input id="f-contact" name="contact" autocomplete="tel"></div>
-        <label class="consent" for="f-consent"><input type="checkbox" id="f-consent" name="consent_data">ยินยอมให้ CoachMew Mastermind เก็บข้อมูลนี้ เพื่อส่งผลแบบทดสอบ และปรับปรุงบริการให้เหมาะกับคุณ</label>
-        <label class="consent" for="f-mkt"><input type="checkbox" id="f-mkt" name="consent_marketing">ยินดีรับข่าวสาร คอนเทนต์ และโปรโมชันจากโค้ชมิว <small>(ไม่บังคับ)</small></label>
-        <p class="err" id="f-err" hidden></p>
-        <div class="qnav"><button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button><button class="btn btn-gold" type="submit" id="f-submit">ส่งข้อมูล</button></div>
-      </form>`;
-    document.getElementById('leadForm').addEventListener('submit', onSubmit);
-  }
-  const back = document.getElementById('qBack');
-  if(back) back.addEventListener('click',()=>{step--;render()});
-}
-
-async function saveLead(row){
-  if(!SUPABASE_URL || !SUPABASE_KEY){
-    console.info('[lead] ยังไม่ได้ตั้งค่า Supabase ข้อมูลนี้ไม่ได้ถูกบันทึก', row);
-    return;
-  }
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
-    method:'POST',
-    // คีย์แบบใหม่ (sb_publishable_...) ส่งใน apikey อย่างเดียว ส่วนคีย์ anon แบบเก่า (eyJ...) ส่งใน Authorization ด้วย
-    headers:sbHeaders(),
-    body:JSON.stringify(row)
-  });
-  if(!res.ok) throw new Error(await res.text());
-}
-
-async function onSubmit(e){
-  e.preventDefault();
-  const f = e.target, err = document.getElementById('f-err');
-  const name = document.getElementById('f-name').value.trim(), email = f.email.value.trim();
-  const msg = !name ? 'กรุณากรอกชื่อเล่น'
-    : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'กรุณากรอกอีเมลให้ถูกต้อง เช่น name@gmail.com'
-    : !f.consent_data.checked ? 'กรุณาติ๊กยินยอมให้เก็บข้อมูล เพื่อให้เราส่งผลให้คุณได้'
-    : '';
-  if(msg){ err.textContent = msg; err.hidden = false; return; }
-  err.hidden = true;
-  const btn = document.getElementById('f-submit');
-  btn.disabled = true; btn.textContent = 'กำลังส่ง...';
-  try{
-    await saveLead({
-      name, email, contact: f.contact.value.trim() || null,
-      ...answers,
-      consent_data: true, consent_marketing: f.consent_marketing.checked,
-      ...source
-    });
-    track(TOTAL + 1, 'submit', null, true);
-    step = TOTAL; setProgress('เรียบร้อย');
-    stage.innerHTML = `<div class="done"><div class="tick">✓</div><h3>ขอบคุณค่ะ คุณ${esc(name)}</h3><p class="lead" style="text-align:center">เราได้รับข้อมูลแล้ว เมื่อแบบทดสอบ Personal Type เปิด จะส่งลิงก์ไปที่ ${esc(email)} ก่อนใคร</p></div>`;
-  }catch(ex){
-    console.error(ex);
-    err.textContent = 'ส่งข้อมูลไม่สำเร็จ ลองกดส่งอีกครั้ง หรือทักไลน์โค้ชมิวได้เลย';
-    err.hidden = false; btn.disabled = false; btn.textContent = 'ส่งข้อมูล';
-  }
-}
-render();
-
-// บันทึกว่ามีคน "เห็นฟอร์ม" (ครั้งเดียวต่อการเปิดเว็บ)
-if('IntersectionObserver' in window){
-  const io = new IntersectionObserver(es=>{ if(es.some(e=>e.isIntersecting)){ track(0,'view',null,true); io.disconnect(); } }, {threshold:0.4});
-  io.observe(document.getElementById('quizPreview'));
-}
-
-document.getElementById('quizStart').addEventListener('click',()=>{
-  document.getElementById('quizPreview').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
-});
 </script>
 </body>
 </html>
