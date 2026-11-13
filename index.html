@@ -3,268 +3,209 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CoachMew Mastermind</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>Coach Mew Mastermind · Find Your Light. Build Your Brand.</title>
+<meta name="description" content="ค้นพบดาวประจำตัวของคุณฟรีกับ Cosmic Identity แบบประเมินเพื่อสำรวจสไตล์การสื่อสารและ Personal Brand โดยครูมิว">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@200;300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
   <div class="wrap nav">
-    <a class="logo" href="#top" aria-label="CoachMew Mastermind หน้าแรก">
-      <span class="logo-mark">M</span>
-      <span class="logo-txt"><b>CoachMew</b><small>MASTERMIND</small></span>
+    <a class="logo" href="index.html" aria-label="Coach Mew Mastermind หน้าแรก">
+      <span class="logo-mark" data-icon="logo"></span>
+      <span class="logo-txt"><b>Coach Mew</b><small>MASTERMIND</small></span>
     </a>
     <ul class="menu" id="menu">
-      <li><a href="#steps">บริการ</a></li>
-      <li><a href="#types">4 ไทป์ดาว</a></li>
-      <li><a href="#about">รู้จักโค้ชมิว</a></li>
-      <li><a href="quiz.html">แบบทดสอบ</a></li>
-      <li><a href="#faq">คำถามที่พบบ่อย</a></li>
+      <li><a href="index.html" aria-current="page">หน้าแรก</a></li>
+      <li><a href="#coach">รู้จักครูมิว</a></li>
+      <li><a href="quiz.html">ค้นหาดาวของคุณ</a></li>
+      <li><a href="#coaching">Coaching</a></li>
+      <li><a href="#course">คอร์สออนไลน์</a></li>
     </ul>
-    <a class="btn btn-main nav-cta" href="quiz.html">ทำแบบทดสอบ</a>
+    <a class="btn btn-gold nav-cta" href="quiz.html">ค้นพบดาวประจำตัวฟรี</a>
     <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
   </div>
 </header>
 
-<main id="top">
-  <!-- HERO -->
-  <section class="hero">
-    <div class="wrap">
-      <div class="hero-grid">
-        <span class="eyebrow">Personal Branding · เพื่อนร่วมทางในการสร้างตัวตน</span>
-        <p class="tag script">ค้นพบตัวตน<br>สร้างแบรนด์ในแบบที่เป็นคุณ</p>
-        <h1>สำหรับเจ้าของธุรกิจ คนทำงาน และครีเอเตอร์มือใหม่<br>ที่อยากสื่อสารตัวเองให้ชัด โดยมี <em>AI</em> เป็นผู้ช่วย</h1>
-        <p class="lead">เริ่มจากรู้ว่าคุณเป็นดาวดวงไหนใน 4 Cosmic Identity แล้วโค้ชมิวจะช่วยวางทิศทางแบรนด์และคอนเทนต์ที่เป็นตัวคุณจริงๆ</p>
-        <div class="cta-row">
-          <a class="btn btn-main" href="quiz.html">ทดลอง Cosmic Identity ฟรี</a>
-          <a class="btn btn-ghost" href="#steps">ดูวิธีการทำงาน</a>
-        </div>
+<main>
+  <!-- 1. HERO -->
+  <section class="hero dark stars">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Find Your Light. Build Your Brand.</span>
+        <h1>ทุกคนมี<span>แสง</span><br>ในแบบของตัวเอง</h1>
+        <p class="lead">ค้นพบตัวตน สร้างแบรนด์ในแบบที่เป็นคุณ กับเพื่อนร่วมทางในการสร้างตัวตน</p>
+        <a class="btn btn-gold" href="quiz.html">ค้นพบดาวประจำตัวฟรี</a>
+        <p class="meta">12 คำถาม • 3–5 นาที • ผลฟรีทันที</p>
       </div>
-      <div class="banner"><img src="banner.webp" alt="โค้ชมิว เพื่อนร่วมทาง สร้างตัวตนสไตล์คุณแม่ยุค AI" width="2000" height="761"></div>
-      <a class="start" href="#steps">START NOW<span aria-hidden="true">⌄</span></a>
+      <!-- TODO: ใส่รูปครูมิวจริง แทนกล่องนี้ เช่น <img src="images/coach-mew.webp" alt="ครูมิว" class="photo-slot"> -->
+      <div class="photo-slot">ใส่รูปครูมิว<br>(แนวตั้ง 4:5)</div>
     </div>
   </section>
 
-  <!-- STATS (ใส่ตัวเลขจริง) -->
-  <section class="stats" id="stats" hidden><!-- ซ่อนไว้: รอตัวเลขจริง ลบคำว่า hidden เพื่อเปิด -->
-    <div class="wrap">
-      <div class="stat-row">
-        <div class="stat"><b data-count="500">0</b><span>คนที่ค้นพบตัวตนกับโค้ชมิว</span></div>
-        <div class="stat"><b data-count="120">0</b><span>ชั่วโมงโค้ชชิ่งตัวต่อตัว</span></div>
-        <div class="stat"><b data-count="40">0</b><span>สมาชิก Mastermind</span></div>
-      </div>
-      <p class="draft" style="text-align:center;margin-top:10px">* ตัวเลขตัวอย่าง รอใส่ข้อมูลจริง</p>
-    </div>
-  </section>
-
-  <!-- 3 STEPS -->
-  <section class="band" id="steps">
+  <!-- 2. ใครเหมาะกับที่นี่ -->
+  <section id="for-you">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">How it works</span>
-        <h2 style="color:var(--band-ink)">3 ขั้นตอน พาคุณจาก"ไม่รู้จะเริ่มตรงไหน" สู่แบรนด์ที่เป็นตัวเอง</h2>
-        <p class="lead">เริ่มจากขั้นไหนก็ได้ตามจังหวะของคุณ ทุกขั้นเชื่อมต่อกันเพื่อให้ตัวตนที่สื่อออกไปตรงกับตัวจริง</p>
+        <span class="eyebrow">ใครเหมาะกับที่นี่</span>
+        <h2>มีของดีอยู่แล้ว แต่ยังไม่รู้จะสื่อสารตัวเองยังไง</h2>
       </div>
-      <div class="steps">
-        <article class="step">
-          <div class="step-top"><span class="step-num">STEP 01</span><span class="pill">ฟรี · 2–3 นาที</span></div>
-          <h3>COSMIC IDENTITY<small>รู้ว่าคุณเป็นดาวดวงไหน</small></h3>
-          <p>คำถามแบบสถานการณ์ ไม่มีถูกผิด รู้ผลทันที ช่วยให้เห็นจุดแข็ง สิ่งที่ควรระวัง และสไตล์คอนเทนต์ที่เป็นธรรมชาติของคุณ</p>
-          <a class="btn btn-main" href="quiz.html">ทำแบบทดสอบฟรี</a>
-        </article>
-        <article class="step">
-          <div class="step-top"><span class="step-num">STEP 02</span><span class="pill">1:1 กับโค้ชมิว</span></div>
-          <h3>COACHING<small>วางทิศทางแบรนด์ให้ชัด</small></h3>
-          <p>คุยกับโค้ชมิวตัวต่อตัว ตั้งแต่ Self-Discovery, Brand Clarity, Audience Direction จนได้ Action Plan ที่ลงมือได้ทันที</p>
-          <a class="btn btn-ghost" href="#contact">สอบถามโค้ชมิว</a>
-        </article>
-        <article class="step">
-          <div class="step-top"><span class="step-num">STEP 03</span><span class="pill">เรียนตามจังหวะตัวเอง</span></div>
-          <h3>ONLINE COURSE<small>ลงมือสร้างด้วย AI</small></h3>
-          <p>3 ช่วง Discover → Plan, Create → Produce, Present → Grow พร้อม Workbook ใช้ AI ช่วยคิดคอนเทนต์ ทำภาพ และตัดต่อ</p>
-          <a class="btn btn-ghost" href="#contact">สอบถามโค้ชมิว</a>
-        </article>
+      <div class="grid grid-3">
+        <article class="card"><h3>เจ้าของธุรกิจ</h3><p>สินค้าดี แต่สื่อสารความต่างได้ไม่ชัด และยังไม่มีทิศทางคอนเทนต์</p></article>
+        <article class="card"><h3>คนทำงาน / Sales</h3><p>มีความรู้และประสบการณ์ แต่ไม่รู้จะสื่อสารจุดแข็งของตัวเองยังไง</p></article>
+        <article class="card"><h3>Creator มือใหม่</h3><p>ไม่รู้จะพูดอะไร ใช้แพลตฟอร์มไหน และใช้ AI ช่วยยังไง</p></article>
       </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section id="about">
-    <div class="wrap about-grid">
-      <div class="portrait">ใส่รูปโค้ชมิว<br>(แนวตั้ง 4:5)</div>
-      <div class="about-body">
-        <span class="eyebrow">About CoachMew</span>
-        <p class="quote">"ทุกคนมีเรื่องราวที่มีค่า<br>แค่ต้องมีคนช่วยให้เห็นมัน"</p>
-        <p class="quote-by"><b>โค้ชมิว</b> · ผู้ก่อตั้ง CoachMew Mastermind</p>
-        <p>CoachMew Mastermind คือเพื่อนร่วมทางสำหรับเจ้าของธุรกิจ คนทำงาน และครีเอเตอร์มือใหม่ ที่มีของดีอยู่แล้ว แต่ยังไม่รู้จะสื่อสารความเป็นตัวเองออกไปยังไง เราเชื่อว่าแบรนด์ที่ยั่งยืนเริ่มจากความจริงใจ และความสม่ำเสมอ</p>
-        <p>ในยุคที่ AI ทำให้ทุกคนสร้างคอนเทนต์ได้ สิ่งที่ทำให้คุณแตกต่างคือ "ตัวคุณ" โค้ชมิวจะช่วยให้คุณเห็นตัวเองชัดขึ้น แล้วใช้เครื่องมือใหม่ๆ ช่วยเล่าเรื่องนั้นอย่างมั่นใจ</p>
-        <!-- TODO: ใส่ประวัติ/ผลงานโค้ชมิว -->
-      </div>
-    </div>
-  </section>
-
-  <!-- PROMISE -->
-  <section class="promise" style="padding-block:40px 88px">
-    <div class="wrap">
-      <h2>ทุกคนมีจังหวะของตัวเอง เราจึงอยู่ตรงนี้เพื่อช่วยให้คุณ...</h2>
-      <span class="rotator" id="rotator" aria-live="polite">ค้นพบตัวตน · วางทิศทาง · สื่อสารอย่างมั่นใจ</span>
-    </div>
-  </section>
-
-  <!-- 4 COSMIC IDENTITY TYPES ตาม blueprint (สร้างจาก JS ตัวแปร TYPES ด้านล่าง แก้ชื่อ/ข้อความที่นั่นที่เดียว) -->
-  <section id="types">
+  <!-- 3. แนะนำ Cosmic Identity + การ์ด 4 ดาว (ข้อความจาก data/cosmic-identity.json) -->
+  <section id="stars" class="dark stars">
     <div class="wrap">
       <div class="sec-head center">
-        <span class="eyebrow">4 Cosmic Identity Types</span>
-        <h2>ทุกคนมีดาวประจำตัว ที่บอกว่าคุณสื่อสารแบบไหนได้ดีที่สุด</h2>
+        <span class="eyebrow">Cosmic Identity</span>
+        <h2>4 ดวงดาว 4 พลังการสื่อสาร</h2>
+        <p class="lead">แบบประเมินเพื่อสำรวจตนเอง ว่าคุณมีแนวโน้มสื่อสารและสร้างความน่าเชื่อถือแบบไหน ดาวเป็นสัญลักษณ์ ไม่ใช่โหราศาสตร์</p>
       </div>
-      <div class="cosmic" id="typeCards"></div>
-    </div>
-  </section>
-
-  <!-- QUIZ CTA: ตัวแบบทดสอบอยู่ที่หน้า quiz.html -->
-  <section id="quiz" style="background:var(--bg-2)">
-    <div class="wrap final">
-      <span class="eyebrow">Step 01 · Cosmic Identity</span>
-      <h2 class="sec-head" style="margin:0;font-size:clamp(26px,3.6vw,38px)">คุณเป็นดาวดวงไหน?</h2>
-      <p class="lead">ตอบ 5 สถานการณ์ ใช้เวลาไม่ถึง 2 นาที รู้ผลทันทีว่าคุณเป็นดาวดวงไหนใน 4 Cosmic Identity และควรเริ่มสื่อสารตัวเองยังไง</p>
-      <ul class="checks checks-row">
-        <li>รู้จุดแข็งที่คนอื่นจะจำคุณได้</li>
-        <li>รู้คอนเทนต์ที่เหมาะกับคุณ</li>
-        <li>รู้ก้าวแรกที่ทำได้วันนี้</li>
-      </ul>
-      <a class="btn btn-main" href="quiz.html">เริ่มทำแบบทดสอบ</a>
-    </div>
-  </section>
-
-  <!-- PRICING -->
-  <section id="pricing" hidden><!-- ซ่อนไว้: รอราคาจริง ลบคำว่า hidden เพื่อเปิด -->
-    <div class="wrap">
-      <div class="sec-head center">
-        <span class="eyebrow">Pricing</span>
-        <h2>เลือกจุดเริ่มต้นที่เหมาะกับคุณ</h2>
-        <p class="draft">* ราคาและรายละเอียดเป็นโครงร่าง รอกำหนดจริง</p>
-      </div>
-      <div class="prices">
-        <article class="price">
-          <h3>PERSONAL TYPE</h3>
-          <p class="for">เหมาะกับ: คนที่ยังไม่แน่ใจว่าตัวเองควรมีคาแรกเตอร์แบบไหน</p>
-          <div class="amount">ฟรี<small>ผลเบื้องต้น</small></div>
-          <ul>
-            <li>ผล Cosmic Identity เชิงลึก</li>
-            <li>จุดแข็งและสิ่งที่ควรระวัง</li>
-            <li>รายงานฉบับเต็ม (ตัวเลือกเสริม)</li>
-          </ul>
-          <a class="btn btn-ghost" href="quiz.html">เริ่มทำแบบทดสอบ</a>
-        </article>
-        <article class="price hot">
-          <span class="flag">แนะนำ</span>
-          <h3>BRAND BLUEPRINT</h3>
-          <p class="for">เหมาะกับ: คนที่พร้อมจริงจัง อยากได้แผนตัวตนที่ชัดเจน</p>
-          <div class="amount">฿—<small>จ่ายครั้งเดียว</small></div>
-          <ul>
-            <li>เซสชัน 1:1 กับโค้ชมิว</li>
-            <li>จุดยืน กลุ่มเป้าหมาย และน้ำเสียงแบรนด์</li>
-            <li>เสาหลักคอนเทนต์ + แผนคอนเทนต์ 30 วัน</li>
-            <li>สรุปเป็นเล่ม Blueprint ส่วนตัว</li>
-          </ul>
-          <a class="btn btn-main" href="#contact">จองคิวโค้ช</a>
-        </article>
-        <article class="price">
-          <h3>MASTERMIND</h3>
-          <p class="for">เหมาะกับ: คนที่อยากมีเพื่อนร่วมทางและทำคอนเทนต์ต่อเนื่อง</p>
-          <div class="amount">฿—<small>/ เดือน</small></div>
-          <ul>
-            <li>คลาสกลุ่มออนไลน์ทุกเดือน</li>
-            <li>เวิร์กช็อปใช้ AI ทำคอนเทนต์</li>
-            <li>กลุ่มลับสำหรับถาม-ตอบ</li>
-            <li>รีวิวคอนเทนต์จากโค้ช</li>
-          </ul>
-          <a class="btn btn-ghost" href="#contact">สมัครสมาชิก</a>
-        </article>
+      <div class="grid grid-4" id="starCards" aria-live="polite"></div>
+      <div class="center" style="display:grid;margin-top:32px">
+        <a class="btn btn-gold" href="quiz.html">ค้นพบดาวประจำตัวฟรี</a>
       </div>
     </div>
   </section>
 
-  <!-- REVIEWS -->
-  <section id="reviews" style="padding-top:0" hidden><!-- ซ่อนไว้: รอรีวิวจริง ลบคำว่า hidden เพื่อเปิด -->
+  <!-- 4. ทำแบบประเมินแล้วได้อะไร -->
+  <section id="get">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">Reviews</span>
-        <h2>เสียงจากเพื่อนร่วมทาง</h2>
-        <p class="draft">* ข้อความตัวอย่าง แทนที่ด้วยรีวิวจริงจากลูกค้า</p>
+        <span class="eyebrow">ทำแบบประเมินแล้วได้อะไร</span>
+        <h2>ผลฟรี อ่านได้ทันทีบนเว็บ</h2>
       </div>
-      <div class="reviews">
-        <figure class="review" style="margin:0"><p>"ข้อความรีวิวจากลูกค้า เช่น สิ่งที่เปลี่ยนไปหลังจากได้ทำงานกับโค้ชมิว"</p><span>ชื่อลูกค้า · อาชีพ</span></figure>
-        <figure class="review" style="margin:0"><p>"ข้อความรีวิวจากลูกค้า เช่น ความรู้สึกหลังได้เห็นตัวตนของตัวเองชัดขึ้น"</p><span>ชื่อลูกค้า · อาชีพ</span></figure>
-        <figure class="review" style="margin:0"><p>"ข้อความรีวิวจากลูกค้า เช่น ผลลัพธ์ที่เกิดขึ้นกับยอดผู้ติดตามหรือยอดขาย"</p><span>ชื่อลูกค้า · อาชีพ</span></figure>
+      <div class="grid grid-4">
+        <article class="card"><span class="num">01</span><h3>รู้ดาวประจำตัว</h3><p>รู้ว่าพลังการสื่อสารแบบไหนที่เป็นธรรมชาติของคุณ</p></article>
+        <article class="card"><span class="num">02</span><h3>จุดแข็งและข้อระวัง</h3><p>เห็นทั้งพลังที่ควรใช้ และมุมที่ควรระวังเวลาสื่อสาร</p></article>
+        <article class="card"><span class="num">03</span><h3>โจทย์คอนเทนต์แรก</h3><p>ได้ไอเดียคอนเทนต์ที่เริ่มทำได้เลย ตามสไตล์ของคุณ</p></article>
+        <article class="card"><span class="num">04</span><h3>อ่านผลฟรีบนเว็บ</h3><p>ไม่ต้องกรอกอีเมล ตอบครบแล้วเห็นผลทันที</p></article>
       </div>
     </div>
   </section>
 
-  <!-- FAQ -->
-  <section id="faq" style="background:var(--bg-2)">
+  <!-- 5. Meet Coach Mew -->
+  <section id="coach" style="padding-top:0">
+    <div class="wrap coach-grid">
+      <!-- TODO: ใส่รูปครูมิวจริง -->
+      <div class="photo-slot light">ใส่รูปครูมิว<br>(แนวตั้ง 4:5)</div>
+      <div style="display:grid;gap:16px">
+        <span class="eyebrow">Meet Coach Mew</span>
+        <h2 style="font-size:clamp(26px,4vw,38px)">ครูมิว เพื่อนร่วมทางในการสร้างตัวตน</h2>
+        <ul class="tags">
+          <li>อดีตครูคอมพิวเตอร์</li>
+          <li>คุณแม่</li>
+          <li>ผู้ประกอบการ</li>
+          <li>ผู้ศึกษา Coaching</li>
+        </ul>
+        <p class="lead">ครูมิวเชื่อว่าแบรนด์ที่ยั่งยืนเริ่มจากการเข้าใจตัวเอง และใช้ AI เป็นเครื่องมือช่วยเล่าเรื่องของคุณ ไม่ใช่แทนที่ตัวคุณ</p>
+        <!-- TODO: ใส่ประวัติ/ผลงานครูมิวที่ยืนยันแล้ว (ห้ามใส่ตัวเลขที่ยังไม่ยืนยัน) -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Journey -->
+  <section id="journey" class="dark">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">Your Journey</span>
+        <h2>เส้นทางจากค้นพบ สู่เติบโต</h2>
+      </div>
+      <div class="journey">
+        <article class="card"><span class="num">STEP 1</span><h3>Discover</h3><p>ค้นพบดาวประจำตัวและพลังการสื่อสารของคุณ</p></article>
+        <article class="card"><span class="num">STEP 2</span><h3>Clarify</h3><p>ทำให้ตัวตน จุดยืน และกลุ่มเป้าหมายชัดขึ้น</p></article>
+        <article class="card"><span class="num">STEP 3</span><h3>Create</h3><p>สร้างคอนเทนต์ในแบบของคุณ โดยมี AI เป็นผู้ช่วย</p></article>
+        <article class="card"><span class="num">STEP 4</span><h3>Grow</h3><p>สื่อสารอย่างต่อเนื่อง และเติบโตในแบบที่เป็นคุณ</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. ทางเลือกบริการ (ราคายังไม่ล็อก — ยังไม่แสดง) -->
+  <section id="services">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">ทางเลือกต่อจากผลฟรี</span>
+        <h2>เลือกเส้นทางที่เหมาะกับคุณ</h2>
+        <p class="lead">ไม่บังคับ เลือกได้ตามจังหวะของคุณเอง</p>
+      </div>
+      <div class="grid grid-2">
+        <article class="card" id="coaching">
+          <span class="num">1:1 กับครูมิว</span>
+          <h3>Personal Brand Coaching</h3>
+          <p>คุยกับครูมิวตัวต่อตัว ตั้งแต่ Self-Discovery, Brand Clarity, Audience Direction จนได้ Action Plan ของคุณเอง</p>
+          <span data-line="สอบถามทาง LINE" data-track="cta_coaching" class="btn btn-gold"></span>
+        </article>
+        <article class="card" id="course">
+          <span class="num">เรียนตามจังหวะตัวเอง</span>
+          <h3>Online Course</h3>
+          <p>Discover → Plan, Create → Produce และ Present → Grow พร้อม Workbook ใช้ AI ช่วยทำคอนเทนต์ ภาพ และตัดต่อ</p>
+          <span data-line="สอบถามทาง LINE" data-track="cta_course" class="btn btn-line"></span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FAQ -->
+  <section id="faq" style="padding-top:0">
     <div class="wrap">
       <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>คำถามที่พบบ่อย</h2></div>
       <div class="faq">
-        <details><summary>ไม่เคยทำคอนเทนต์มาก่อนเลย เริ่มได้ไหม?</summary><p>ได้ค่ะ แนะนำให้เริ่มจาก Cosmic Identity Quiz เพื่อดูว่าตัวเองถนัดสื่อสารแบบไหน แล้วค่อยต่อยอดด้วย Coaching หรือคอร์สออนไลน์</p></details>
-        <details><summary>ต้องใช้ AI เป็นก่อนไหม?</summary><p>ไม่จำเป็นค่ะ ในคอร์สจะสอนตั้งแต่พื้นฐาน ใช้เครื่องมือที่ใช้ได้จริงในชีวิตประจำวัน AI เป็นแค่ผู้ช่วย ตัวคุณคือหัวใจของแบรนด์</p></details>
-        <details><summary>Coaching กับคอร์สออนไลน์ต่างกันยังไง?</summary><p>คอร์สออนไลน์เรียนเองตามจังหวะของคุณ ส่วน Coaching ได้คุยกับโค้ชมิวตัวต่อตัวเพื่อวางทิศทางให้ชัด พร้อมได้คอร์สด้วย รายละเอียดและราคาจะประกาศเร็วๆ นี้</p></details>
-        <details><summary>ชำระเงินและติดต่อได้ทางไหน?</summary><p>รอใส่ช่องทางชำระเงินและช่องทางติดต่อ เช่น LINE OA หรือ Facebook Page</p></details>
+        <details class="qa"><summary>เริ่มจากศูนย์ได้ไหม?</summary><p>ได้ค่ะ แบบประเมินและเนื้อหาออกแบบมาสำหรับมือใหม่ เริ่มจากรู้จักดาวประจำตัวก่อนก็พอ</p></details>
+        <details class="qa"><summary>ฟรีจริงไหม?</summary><p>ผลเบื้องต้นของ Cosmic Identity ฟรี อ่านได้ทันทีบนเว็บหลังตอบครบ 12 ข้อ</p></details>
+        <details class="qa"><summary>ต้องทำ Coaching ไหม?</summary><p>ไม่จำเป็นค่ะ Coaching และคอร์สออนไลน์เป็นทางเลือกสำหรับคนที่อยากไปต่อ</p></details>
+        <details class="qa"><summary>ไทป์เปลี่ยนได้ไหม?</summary><p>ผลเป็นแนวโน้มจากคำตอบในตอนนั้น ไม่ใช่กรอบตายตัว และทุกคนมีพลังของหลายดาวอยู่ในตัวได้</p></details>
+        <details class="qa"><summary>ต้องเก่ง AI ไหม?</summary><p>ไม่จำเป็นค่ะ AI เป็นแค่เครื่องมือช่วย หัวใจของแบรนด์คือตัวคุณ</p></details>
       </div>
     </div>
   </section>
 
-  <!-- FINAL CTA -->
-  <section id="contact">
+  <!-- 9. FINAL CTA -->
+  <section class="dark stars">
     <div class="wrap final">
-      <span class="eyebrow">It's your turn</span>
-      <p class="script">พร้อมเป็นตัวเองแล้วหรือยัง?</p>
-      <p class="lead">เริ่มจากแบบทดสอบสั้นๆ หรือทักมาคุยกับโค้ชมิวได้เลย</p>
-      <div class="cta-row">
-        <a class="btn btn-main" href="quiz.html">ทำแบบทดสอบ</a>
-        <a class="btn btn-ghost" href="#contact">ทัก LINE โค้ชมิว</a>
-      </div>
+      <span class="eyebrow">Find Your Light. Build Your Brand.</span>
+      <h2>ดวงดาวของคุณกำลังรอให้ค้นพบ</h2>
+      <a class="btn btn-gold" href="quiz.html">เริ่มทำแบบประเมินฟรี</a>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap foot">
-    <span>© 2026 CoachMew Mastermind</span>
+    <span class="slogan">เพื่อนร่วมทางในการสร้างตัวตน</span>
+    <!-- TODO: สร้างหน้า privacy.html และ terms.html แล้วเปลี่ยน span เป็นลิงก์ -->
     <ul>
-      <li><a href="#steps">บริการ</a></li>
-      <li><a href="quiz.html">แบบทดสอบ</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><span>Privacy Policy <span class="soon">(เร็ว ๆ นี้)</span></span></li>
+      <li><span>Terms <span class="soon">(เร็ว ๆ นี้)</span></span></li>
     </ul>
+    <span>© 2026 Coach Mew Mastermind</span>
   </div>
 </footer>
 
-<script src="quiz-data.js"></script>
+<script src="cosmic.js"></script>
 <script>
-// Mobile menu
-const burger=document.getElementById('burger'),menu=document.getElementById('menu');
-burger.addEventListener('click',()=>{const o=menu.classList.toggle('open');burger.setAttribute('aria-expanded',o)});
-menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{menu.classList.remove('open');burger.setAttribute('aria-expanded','false')}));
-
-// Count-up stats (resting value is the final number if JS/motion is off)
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-document.querySelectorAll('[data-count]').forEach(el=>{
-  const end=+el.dataset.count;
-  if(reduce){el.textContent=end+'+';return}
-  let t0=null;
-  const tick=ts=>{t0??=ts;const p=Math.min((ts-t0)/1400,1);el.textContent=Math.round(end*(1-Math.pow(1-p,3)))+(p===1?'+':'');if(p<1)requestAnimationFrame(tick)};
-  requestAnimationFrame(tick);
+// การ์ด 4 ดาว: ชื่อ, สัญลักษณ์, signature_power จาก JSON
+Cosmic.loadData().then(data=>{
+  const {esc, ICONS} = Cosmic;
+  document.getElementById('starCards').innerHTML = Object.entries(data.types).map(([code,t])=>`
+    <article class="card star-card" style="background:var(--brand-off-white);border-color:var(--brand-light-gold)">
+      <span class="ico">${ICONS[code]}</span>
+      <h3 style="color:var(--brand-navy)">${esc(t.display_name)}</h3>
+      <span class="sym">${esc(t.symbol)}</span>
+      <span class="power">${esc(t.signature_power)}</span>
+    </article>`).join('');
+}).catch(err=>{
+  console.error(err);
+  document.getElementById('starCards').innerHTML = '<p class="lead">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง</p>';
 });
-
-// Rotating promise words
-const sets=['ค้นพบตัวตน · วางทิศทาง · สื่อสารอย่างมั่นใจ','เข้าใจตัวเอง · ออกแบบจุดยืน · เติบโตในแบบของคุณ','มองเห็นเรื่องราว · ใช้ AI เป็นผู้ช่วย · เป็นตัวเองอย่างสม่ำเสมอ'];
-const rot=document.getElementById('rotator');let ri=0;
-if(!reduce)setInterval(()=>{rot.style.opacity=0;setTimeout(()=>{ri=(ri+1)%sets.length;rot.textContent=sets[ri];rot.style.opacity=1},400)},3200);
+document.addEventListener('click', e=>{ const t = e.target.closest('[data-track]'); if(t && t.dataset.track) Cosmic.track(t.dataset.track); });
 </script>
 </body>
 </html>

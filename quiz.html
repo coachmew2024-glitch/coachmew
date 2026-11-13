@@ -3,242 +3,388 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cosmic Identity Quiz · CoachMew Mastermind</title>
+<title>Cosmic Identity · Coach Mew Mastermind</title>
+<meta name="description" content="ทุกคนมีแสงในแบบของตัวเอง แล้วคุณล่ะ มีพลังของดวงดาวแบบไหน? 12 คำถาม ประมาณ 3–5 นาที ผลฟรีทันที">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@200;300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
   <div class="wrap nav">
-    <a class="logo" href="index.html" aria-label="CoachMew Mastermind หน้าแรก">
-      <span class="logo-mark">M</span>
-      <span class="logo-txt"><b>CoachMew</b><small>MASTERMIND</small></span>
+    <a class="logo" href="index.html" aria-label="Coach Mew Mastermind หน้าแรก">
+      <span class="logo-mark" data-icon="logo"></span>
+      <span class="logo-txt"><b>Coach Mew</b><small>MASTERMIND</small></span>
     </a>
-    <a class="btn btn-ghost" href="index.html" style="padding:8px 18px">← กลับหน้าแรก</a>
+    <ul class="menu" id="menu">
+      <li><a href="index.html">หน้าแรก</a></li>
+      <li><a href="index.html#coach">รู้จักครูมิว</a></li>
+      <li><a href="quiz.html" aria-current="page">ค้นหาดาวของคุณ</a></li>
+      <li><a href="index.html#coaching">Coaching</a></li>
+      <li><a href="index.html#course">คอร์สออนไลน์</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
   </div>
 </header>
 
-<main class="quiz-page">
-  <div class="wrap">
-    <div class="quiz-intro">
-      <span class="eyebrow">Cosmic Identity</span>
-      <h1>คุณเป็นดาวดวงไหน?</h1>
-      <p>เล่าเกี่ยวกับตัวคุณสั้นๆ แล้วตอบ 5 สถานการณ์ ไม่มีถูกผิด รู้ผลทันที</p>
-    </div>
-
-    <!-- ลำดับ: คำถามเกี่ยวกับคุณ 5 ข้อ → ชื่อ/อีเมล (บันทึกลง Supabase ตาราง leads) → ควิซ 5 ข้อ → ผลไทป์ -->
-    <div class="qcard" id="quizPreview">
-      <div class="qmeta"><span id="qLabel">เกี่ยวกับคุณ</span><span id="qCount">ข้อ 1 / 6</span></div>
-      <div class="qbar"><i id="qBar" style="width:17%"></i></div>
-      <div id="qStage" aria-live="polite">
-        <h3>กำลังโหลดแบบทดสอบ...</h3>
-      </div>
-    </div>
-    <p class="note">* เวอร์ชันทดลอง คำถามควิซยังไม่ใช่ฉบับจริง</p>
+<main class="quiz-page stars">
+  <div class="wrap" id="app" aria-live="polite">
+    <div class="panel center-panel"><p>กำลังโหลดแบบประเมิน...</p></div>
   </div>
 </main>
 
-<script src="quiz-data.js"></script>
+<footer>
+  <div class="wrap foot">
+    <span class="slogan">เพื่อนร่วมทางในการสร้างตัวตน</span>
+    <span>© 2026 Coach Mew Mastermind</span>
+  </div>
+</footer>
+
+<script src="cosmic.js"></script>
 <script>
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+(async function(){
+  const {esc, ICONS, store, track} = Cosmic;
+  const app = document.getElementById('app');
+  const KEY = 'cosmic-quiz';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ===== Supabase =====
-const SUPABASE_URL = 'https://xkbhhtauzqgvryeocmiz.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_14U9zriQnKcTb7PSA97zMQ_g1DuzDy-';   // publishable key (ปลอดภัยที่จะอยู่ในหน้าเว็บ)
-
-const QUESTIONS = [
-  {key:'age_range', q:'ช่วงอายุของคุณ', two:true, opts:['ต่ำกว่า 30','30–35','36–40','41–45','46–50','51 ขึ้นไป','ไม่ระบุ']},
-  {key:'gender', q:'เพศ', opts:['หญิง','ชาย','ไม่ระบุ']},
-  {key:'stage', q:'ตอนนี้การสร้างตัวตนออนไลน์ของคุณอยู่ขั้นไหน', opts:['ยังไม่ได้เริ่ม','เริ่มแล้ว แต่ยังไม่ค่อยได้ผล','มีรายได้แล้ว อยากโตต่อ','ไม่ระบุ']},
-  {key:'pain', q:'เรื่องที่ติดอยู่มากที่สุด', opts:['ไม่รู้จะพูดอะไร','ไม่กล้าออกกล้อง','ไม่มีเวลา','ใช้ AI ไม่เป็น','ไม่ระบุ']},
-  {key:'platform', q:'แพลตฟอร์มหลักที่คุณใช้', two:true, opts:['Facebook','TikTok','Instagram','YouTube','LINE','ไม่ระบุ']},
-];
-const TOTAL = QUESTIONS.length + 1;   // คำถามเกี่ยวกับคุณ 5 ข้อ + หน้ากรอกชื่อ
-const answers = {};
-let step = 0;                           // ตำแหน่งในส่วน "เกี่ยวกับคุณ"
-let phase = 'about';                    // about (+ contact) → quiz → result
-let qi = 0;                             // ข้อที่เท่าไหร่ในควิซ
-const picks = [];                       // ไทป์ที่เลือกในแต่ละข้อ
-let result = null, leadName = '';
-
-// ที่มาจากโฆษณา (utm / fbclid ในลิงก์)
-const params = new URLSearchParams(location.search);
-const source = {};
-['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k=>{ if(params.get(k)) source[k]=params.get(k); });
-
-// เก็บทุกคำตอบแบบไม่ระบุตัวตน (ตาราง quiz_events) เพื่อดูว่าคนหยุดที่ข้อไหน
-// step: 0 เปิดหน้าควิซ, 1–5 ตอบข้อเกี่ยวกับคุณ, 6 ถึงหน้ากรอกชื่อ, 7 ส่งข้อมูลสำเร็จ
-const sbHeaders = () => Object.assign({apikey:SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'},
-  SUPABASE_KEY.startsWith('eyJ') ? {Authorization:`Bearer ${SUPABASE_KEY}`} : {});
-const SESSION = (crypto.randomUUID && crypto.randomUUID()) ||
-  ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c=>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
-const tracked = new Set();
-function track(step, question, answer=null, once=false){
-  if(!SUPABASE_URL || !SUPABASE_KEY) return;
-  if(once){ if(tracked.has(question)) return; tracked.add(question); }
-  fetch(`${SUPABASE_URL}/rest/v1/quiz_events`, {
-    method:'POST', keepalive:true, headers:sbHeaders(),
-    body:JSON.stringify({session_id:SESSION, step, question, answer,
-      utm_source:source.utm_source || null, utm_campaign:source.utm_campaign || null})
-  }).catch(()=>{});   // ถ้าส่งไม่ได้ ไม่รบกวนลูกค้า
-}
-
-const stage = document.getElementById('qStage');
-const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-function setProgress(label, n = Math.min(step+1,TOTAL), total = TOTAL){
-  document.getElementById('qLabel').textContent = label;
-  document.getElementById('qCount').textContent = n ? `ข้อ ${n} / ${total}` : '';
-  document.getElementById('qBar').style.width = `${(n || total)/total*100}%`;
-}
-
-// คลิกตัวเลือก: ไฮไลต์ แล้วไปต่อ
-function onPick(fn){
-  stage.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
-    stage.querySelectorAll('.opt').forEach(x=>{x.classList.toggle('sel',x===b);x.setAttribute('aria-checked',x===b)});
-    setTimeout(()=>fn(b.dataset.v), reduce?0:180);
-  }));
-}
-function onBack(fn){ const b = document.getElementById('qBack'); if(b) b.addEventListener('click', fn); }
-const toTop = () => document.getElementById('quizPreview').scrollIntoView({behavior:reduce?'auto':'smooth', block:'start'});
-
-function score(){
-  const n = Object.fromEntries(Object.keys(TYPES).map(k=>[k,0])), last = {};
-  picks.forEach((t,i)=>{ n[t]++; last[t]=i; });
-  const top = Object.keys(n).sort((a,b)=> n[b]-n[a] || (last[b]??-1)-(last[a]??-1))[0];
-  return {top, n};
-}
-
-// ----- 1) เกี่ยวกับคุณ 5 ข้อ -----
-function renderAbout(){
-  const Q = QUESTIONS[step];
-  setProgress('เกี่ยวกับคุณ');
-  stage.innerHTML = `
-    <div style="display:grid;gap:16px">
-      <h3>${esc(Q.q)}</h3>
-      <div class="opts${Q.two?' two':''}" role="radiogroup" aria-label="${esc(Q.q)}">
-        ${Q.opts.map(o=>`<button type="button" class="opt${answers[Q.key]===o?' sel':''}" role="radio" aria-checked="${answers[Q.key]===o}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}
-      </div>
-      <div class="qnav">${step>0?'<button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button>':'<span></span>'}<span class="draft">ทุกข้อเลือก "ไม่ระบุ" ได้</span></div>
-    </div>`;
-  onPick(v=>{
-    answers[Q.key] = v;
-    track(step + 1, Q.key, v);
-    step++; render();
-  });
-  onBack(()=>{ step--; render(); });
-}
-
-// ----- 2) ชื่อ / อีเมล -----
-function renderContact(){
-  setProgress('ข้อมูลติดต่อ');
-  track(QUESTIONS.length + 1, 'contact_form', null, true);
-  stage.innerHTML = `
-    <form id="leadForm" novalidate style="display:grid;gap:14px">
-      <h3>ฝากชื่อและอีเมลไว้ แล้วเริ่มควิซได้เลย</h3>
-      <p class="draft" style="font-style:normal">เราจะส่งผลฉบับเต็มของดาวประจำตัวคุณไปทางอีเมล</p>
-      <div class="field"><label for="f-name">ชื่อเล่น</label><input id="f-name" name="name" autocomplete="nickname" required value="${esc(leadName)}"></div>
-      <div class="field"><label for="f-email">อีเมล</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>
-      <div class="field"><label for="f-contact">LINE ID หรือเบอร์โทร <small>(ไม่บังคับ)</small></label><input id="f-contact" name="contact" autocomplete="tel"></div>
-      <label class="consent" for="f-consent"><input type="checkbox" id="f-consent" name="consent_data">ยินยอมให้ CoachMew Mastermind เก็บข้อมูลนี้ เพื่อส่งผลแบบทดสอบ และปรับปรุงบริการให้เหมาะกับคุณ</label>
-      <label class="consent" for="f-mkt"><input type="checkbox" id="f-mkt" name="consent_marketing">ยินดีรับข่าวสาร คอนเทนต์ และโปรโมชันจากโค้ชมิว <small>(ไม่บังคับ)</small></label>
-      <p class="err" id="f-err" hidden></p>
-      <div class="qnav"><button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button><button class="btn btn-main" type="submit" id="f-submit">เริ่มควิซ →</button></div>
-    </form>`;
-  document.getElementById('leadForm').addEventListener('submit', onSubmit);
-  onBack(()=>{ step--; render(); });
-}
-
-async function saveLead(row){
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {method:'POST', headers:sbHeaders(), body:JSON.stringify(row)});
-  if(!res.ok) throw new Error(await res.text());
-}
-
-async function onSubmit(e){
-  e.preventDefault();
-  const f = e.target, err = document.getElementById('f-err');
-  const name = document.getElementById('f-name').value.trim(), email = f.email.value.trim();
-  const msg = !name ? 'กรุณากรอกชื่อเล่น'
-    : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'กรุณากรอกอีเมลให้ถูกต้อง เช่น name@gmail.com'
-    : !f.consent_data.checked ? 'กรุณาติ๊กยินยอมให้เก็บข้อมูล เพื่อให้เราส่งผลให้คุณได้'
-    : '';
-  if(msg){ err.textContent = msg; err.hidden = false; return; }
-  err.hidden = true;
-  const btn = document.getElementById('f-submit');
-  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
-  try{
-    await saveLead({
-      name, email, contact: f.contact.value.trim() || null,
-      ...answers,
-      consent_data: true, consent_marketing: f.consent_marketing.checked,
-      ...source
-    });
-    track(TOTAL + 1, 'submit', null, true);
-    leadName = name;
-    phase = 'quiz'; qi = 0; render(); toTop();
-  }catch(ex){
-    console.error(ex);
-    err.textContent = 'บันทึกไม่สำเร็จ ลองกดอีกครั้ง หรือทักไลน์โค้ชมิวได้เลย';
-    err.hidden = false; btn.disabled = false; btn.textContent = 'เริ่มควิซ →';
+  let data;
+  try{ data = await Cosmic.loadData(); }
+  catch(err){
+    console.error(err);
+    app.innerHTML = '<div class="panel center-panel"><p>โหลดแบบประเมินไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง</p></div>';
+    return;
   }
-}
 
-// ----- 3) ควิซ 5 ข้อ -----
-function renderQuiz(){
-  const Q = QUIZ[qi];
-  setProgress('Cosmic Identity', qi+1, QUIZ.length);
-  stage.innerHTML = `
-    <div style="display:grid;gap:16px">
-      <h3>${esc(Q.q)}</h3>
-      <div class="opts" role="radiogroup" aria-label="${esc(Q.q)}">
-        ${Q.opts.map(([t,txt])=>`<button type="button" class="opt${picks[qi]===t?' sel':''}" role="radio" aria-checked="${picks[qi]===t}" data-v="${t}">${esc(txt)}</button>`).join('')}
-      </div>
-      <div class="qnav">${qi>0?'<button type="button" class="link-btn" id="qBack">← ย้อนกลับ</button>':'<span></span>'}<span class="draft">ไม่มีถูกผิด เลือกข้อที่ใกล้ตัวคุณที่สุด</span></div>
-    </div>`;
-  onPick(v=>{
-    picks[qi] = v;
-    if(qi < QUIZ.length-1) qi++;
-    else { result = score(); phase = 'result'; toTop(); }
-    render();
+  const Q = data.questions, N = Q.length;                      // 12
+  const qIndex = Object.fromEntries(Q.map((q,i)=>[q.id,i]));
+  const pad = n => String(n).padStart(2,'0');
+
+  // Screen order: welcome → [chapter intro → its questions] ×3 → complete → result
+  const SCREENS = [{k:'welcome'}];
+  data.chapters.forEach((ch,ci)=>{
+    SCREENS.push({k:'chapter', ci});
+    ch.question_ids.forEach(id=>SCREENS.push({k:'q', i:qIndex[id], ci}));
   });
-  onBack(()=>{ qi--; render(); });
-}
+  SCREENS.push({k:'complete'}, {k:'result'});
+  const screenOfQ = i => SCREENS.findIndex(s=>s.k==='q' && s.i===i);
 
-// ----- 4) ผล -----
-function renderResult(){
-  const T = TYPES[result.top];
-  setProgress('ผลของคุณ', 0, 1);
-  stage.innerHTML = `
-    <div class="res" style="--c:${T.c}">
-      <span class="ctype-ico" aria-hidden="true">${T.ico}</span>
-      <div><p class="res-kicker">คุณ${esc(leadName)} คือ</p><h3 class="res-name">${T.name}<small>${T.en}</small></h3></div>
-      <p class="res-tag">${T.tag}</p>
-      <div class="res-box"><p><b>จุดแข็ง</b>${T.good}</p><p><b>ระวัง</b>${T.watch}</p></div>
-      <div><p class="res-h">คอนเทนต์ที่เหมาะกับคุณ</p><ul class="res-list">${T.content.map(c=>`<li>${c}</li>`).join('')}</ul></div>
-      <div><p class="res-h">ก้าวแรกที่ทำได้วันนี้</p><p class="first">${T.first}</p></div>
-      <div class="res-bars" aria-label="สัดส่วนคำตอบ">
-        ${Object.keys(TYPES).map(k=>`<div class="res-bar"><span>${TYPES[k].name}</span><i><b style="width:${result.n[k]/QUIZ.length*100}%;background:${TYPES[k].c}"></b></i><em>${result.n[k]}/${QUIZ.length}</em></div>`).join('')}
-      </div>
-      <p class="draft">ผลนี้ใช้สะท้อนตัวเอง ไม่ใช่แบบทดสอบทางจิตวิทยา · ผลฉบับเต็มจะส่งไปทางอีเมล</p>
-      <div class="res-cta">
-        <a class="btn btn-main" href="index.html#steps">ดู Coaching และคอร์ส</a>
-        <a class="btn btn-ghost" href="index.html#contact">คุยกับโค้ชมิว</a>
-      </div>
-      <button type="button" class="link-btn" id="qRetry">ทำควิซใหม่</button>
-    </div>`;
-  document.getElementById('qRetry').addEventListener('click',()=>{ phase='quiz'; qi=0; picks.length=0; render(); toTop(); });
-}
+  // State (kept in sessionStorage so a refresh continues where you were)
+  const fresh = () => ({pos:0, answers:Array(N).fill(null), saved:false, tab:null});
+  let S = Object.assign(fresh(), store.get(KEY) || {});
+  if(!Array.isArray(S.answers) || S.answers.length !== N) S = fresh();
+  // never sit past the first unanswered question
+  const firstGap = S.answers.findIndex(a=>!a);
+  if(firstGap !== -1 && S.pos > screenOfQ(firstGap)) S.pos = screenOfQ(firstGap);
+  const save = () => store.set(KEY, S);
+  const go = pos => { S.pos = pos; save(); render(); };
 
-function render(){
-  if(phase === 'quiz') return renderQuiz();
-  if(phase === 'result') return renderResult();
-  return step < QUESTIONS.length ? renderAbout() : renderContact();
-}
-render();
-track(0, 'view', null, true);   // มีคนเปิดหน้าควิซ
+  function render(){
+    const s = SCREENS[S.pos];
+    if(s.k === 'welcome') renderWelcome();
+    else if(s.k === 'chapter') renderChapter(s.ci);
+    else if(s.k === 'q') renderQuestion(s.i, s.ci);
+    else if(s.k === 'complete') renderComplete();
+    else renderResult();
+    window.scrollTo({top:0, behavior:'auto'});
+    const h = app.querySelector('h1,h2');
+    if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
+  }
+
+  // ----- Welcome -----
+  function renderWelcome(){
+    track('welcome', {}, true);
+    app.innerHTML = `
+      <div class="panel center-panel">
+        <span class="ico ico-lg">${ICONS.logo}</span>
+        <span class="eyebrow">Cosmic Identity</span>
+        <h1 style="font-size:clamp(24px,6vw,34px)">ทุกคนมีแสงในแบบของตัวเอง<br>แล้วคุณล่ะ มีพลังของดวงดาวแบบไหน?</h1>
+        <p class="lead">ออกเดินทางผ่าน 12 สถานการณ์ในจักรวาล แล้วค้นพบว่าคุณมีแนวโน้มสื่อสารและสร้างแบรนด์ในแบบไหน</p>
+        <div class="pill-row"><span>12 คำถาม</span><span>ประมาณ 3–5 นาที</span><span>ไม่มีถูกหรือผิด</span></div>
+        <ul class="tips">
+          <li>เลือก 1 คำตอบต่อข้อ</li>
+          <li>เลือกสิ่งที่คุณ “มักทำจริง” มากกว่าสิ่งที่อยากเป็น</li>
+          <li>ไม่มีคำตอบถูกหรือผิด</li>
+          <li>แก้คำตอบได้ก่อนส่ง</li>
+          <li>เป็นแบบประเมินเพื่อสำรวจตนเอง (Self-Reflection) ไม่ใช่การวินิจฉัย</li>
+        </ul>
+        <button type="button" class="btn btn-gold btn-block" id="start">เริ่มค้นหาดาวของฉัน</button>
+      </div>`;
+    document.getElementById('start').onclick = ()=>{ track('start'); go(1); };
+  }
+
+  // ----- Chapter intro -----
+  function renderChapter(ci){
+    const ch = data.chapters[ci];
+    app.innerHTML = `
+      <div class="chapter-wrap">
+        <span class="chapter-no">CHAPTER ${ch.id}</span>
+        <h1 class="chapter-name">${esc(ch.name)}</h1>
+        <p class="chapter-th">${esc(ch.title_th)}</p>
+        <p class="intro">${esc(ch.intro)}</p>
+        <button type="button" class="btn btn-gold" id="next">ภารกิจถัดไป</button>
+        <button type="button" class="link-btn" id="back" style="color:var(--brand-light-gold)">ย้อนกลับ</button>
+      </div>`;
+    document.getElementById('next').onclick = ()=>go(S.pos+1);
+    document.getElementById('back').onclick = ()=>go(S.pos-1);
+  }
+
+  // ----- Question (1 per screen; type names never shown here) -----
+  function renderQuestion(i, ci){
+    const q = Q[i], ch = data.chapters[ci], picked = S.answers[i];
+    app.innerHTML = `
+      <div class="panel">
+        <div class="q-head">
+          <div class="q-meta"><b>CHAPTER ${ch.id} · ${esc(ch.name)}</b><span>ข้อ ${pad(i+1)}/${N}</span></div>
+          <div class="bar" role="progressbar" aria-label="ความคืบหน้า" aria-valuemin="0" aria-valuemax="${N}" aria-valuenow="${i+1}"><i style="width:${(i+1)/N*100}%"></i></div>
+        </div>
+        <p class="q-title">${esc(q.title)}</p>
+        <h2 class="q-prompt" id="qp">${esc(q.prompt)}</h2>
+        <fieldset class="opts" aria-labelledby="qp">
+          ${q.answers.map(a=>`
+            <label class="opt">
+              <input type="radio" name="ans" value="${esc(a.option)}"${picked===a.option?' checked':''}>
+              <span class="letter">${esc(a.option)}</span>
+              <span class="txt">${esc(a.text)}</span>
+            </label>`).join('')}
+        </fieldset>
+        <div class="q-nav">
+          <button type="button" class="link-btn" id="back">ย้อนกลับ</button>
+          <button type="button" class="btn btn-gold" id="next"${picked?'':' disabled'}>ภารกิจถัดไป</button>
+        </div>
+      </div>`;
+    const next = document.getElementById('next');
+    app.querySelectorAll('input[name="ans"]').forEach(r=>r.addEventListener('change', ()=>{
+      S.answers[i] = r.value; S.saved = false; save(); next.disabled = false;
+    }));
+    next.onclick = ()=>{
+      if(!S.answers[i]) return;
+      track('answer', {question_no:i+1, option:S.answers[i]});
+      go(S.pos+1);
+    };
+    document.getElementById('back').onclick = ()=>go(S.pos-1);
+  }
+
+  // ----- Completed -----
+  function renderComplete(){
+    track('complete', {}, true);
+    app.innerHTML = `
+      <div class="panel center-panel">
+        <span class="ico ico-lg">${ICONS.logo}</span>
+        <h1 class="done-title" style="color:var(--brand-navy)">COSMIC MISSION COMPLETED!</h1>
+        <p class="lead">คุณเดินทางผ่านทั้ง 12 ภารกิจสำเร็จแล้ว ✨</p>
+        <button type="button" class="btn btn-gold btn-block" id="reveal">เปิดเผย Cosmic Identity ของฉัน</button>
+        <button type="button" class="link-btn" id="back">ย้อนกลับ</button>
+      </div>`;
+    document.getElementById('reveal').onclick = ()=>{
+      const r = Cosmic.score(data, S.answers);
+      if(!S.saved){ Cosmic.saveResult(S.answers, r); S.saved = true; }
+      track('reveal', {}, true);
+      S.tab = r.leading[0];
+      go(S.pos+1);
+    };
+    document.getElementById('back').onclick = ()=>go(S.pos-1);
+  }
+
+  // ----- Result -----
+  const TIE_TEXT = 'คุณมีพลังมากกว่าหนึ่งดวงดาวที่โดดเด่นพอ ๆ กัน นี่อาจสะท้อนว่าคุณใช้วิธีสื่อสารต่างกันตามสถานการณ์ ลองสำรวจทั้งสองแนวทาง แล้วสังเกตว่าแบบไหนเหมาะกับเป้าหมายและธรรมชาติของคุณมากที่สุด';
+
+  function renderResult(){
+    const r = Cosmic.score(data, S.answers);
+    const tie = r.leading.length > 1;
+    if(!r.leading.includes(S.tab)) S.tab = r.leading[0];
+    const code = S.tab, t = data.types[code];
+    const list = arr => `<ul>${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+    const [first, ...rest] = t.intro;
+
+    app.innerHTML = `
+      <div class="result">
+        ${tie ? `
+          <p class="tie-note">${esc(TIE_TEXT)}</p>
+          <div class="tabs" role="tablist" aria-label="ดวงดาวที่โดดเด่นของคุณ">
+            ${r.leading.map(c=>`<button type="button" class="tab" role="tab" aria-selected="${c===code}" data-tab="${c}">${esc(data.types[c].display_name)}</button>`).join('')}
+          </div>` : ''}
+
+        <!-- 1. Hero -->
+        <div class="r-hero" role="${tie?'tabpanel':'region'}">
+          <span class="ico ico-lg">${ICONS[code]}</span>
+          <span class="kicker">YOUR COSMIC IDENTITY</span>
+          <h1>${esc(t.display_name)}</h1>
+          <span class="symbol">${esc(t.symbol)}</span>
+          <p class="title">${esc(t.title)}</p>
+          <p class="tag">${esc(t.tag)}</p>
+        </div>
+
+        <!-- 2. Score bars -->
+        <section class="r-card" aria-label="สัดส่วนคำตอบ">
+          <h2>สัดส่วนคำตอบของคุณ</h2>
+          <div class="scores">
+            ${Object.keys(data.types).map(c=>`
+              <div class="score${r.leading.includes(c)?' lead-type':''}">
+                <div class="score-top"><b>${esc(data.types[c].display_name)} · ${esc(data.types[c].symbol)}</b><span>${r.scores[c]} / ${r.total} · ${r.pct(c)}% ของคำตอบ</span></div>
+                <div class="bar"><i style="width:${r.scores[c]/r.total*100}%"></i></div>
+              </div>`).join('')}
+          </div>
+          <p class="small">ตัวเลขนี้คือสัดส่วนคำตอบจาก 12 สถานการณ์ ไม่ใช่ความแม่นยำของบุคลิกภาพ และทุกคนมีพลังของหลายดาวร่วมกันได้</p>
+        </section>
+
+        <!-- 3. Your Star Story -->
+        <section class="r-card">
+          <h2>Your Star Story</h2>
+          <p>${esc(first)}</p>
+          ${rest.length ? `<details><summary>อ่านต่อ</summary><div class="stack">${rest.map(p=>`<p>${esc(p)}</p>`).join('')}</div></details>` : ''}
+        </section>
+
+        <!-- 4. Cosmic Power + Trust Style -->
+        <div class="split">
+          <section class="r-card">
+            <h2>Your Cosmic Power</h2>
+            ${list(t.strength)}
+          </section>
+          <section class="r-card">
+            <h2>Trust Style</h2>
+            <h3>${esc(t.trust_style)}</h3>
+            <p>${esc(t.trust)}</p>
+          </section>
+        </div>
+
+        <!-- 5. Content Universe + Shadow -->
+        <section class="r-card">
+          <h2>Your Content Universe</h2>
+          ${list(t.content)}
+          <p class="example"><b>ตัวอย่างหัวข้อ:</b> ${esc(t.example)}</p>
+        </section>
+        <section class="r-card">
+          <h2>Your Shadow</h2>
+          <p>${esc(t.shadow)}</p>
+          <p class="quote">${esc(t.shadowline)}</p>
+        </section>
+
+        <!-- 6. First Mission + Reminder -->
+        <section class="r-card">
+          <h2>Your First Cosmic Mission</h2>
+          ${list(t.missions)}
+          <h3 style="margin-top:6px">Cosmic Reminder</h3>
+          <p class="quote">${esc(t.reminder)}</p>
+        </section>
+
+        <!-- 7. Share / PDF / CTA -->
+        <section class="r-card no-print">
+          <h2>ไปต่อจากผลของคุณ</h2>
+          <div class="actions">
+            <button type="button" class="btn btn-gold" id="share">แชร์ดวงดาวของฉัน</button>
+            <button type="button" class="btn btn-line" id="pdf">ดาวน์โหลดผลลัพธ์ PDF</button>
+            <button type="button" class="btn btn-line" id="copy">คัดลอกลิงก์แบบทดสอบ</button>
+            <button type="button" class="btn btn-line" id="retake">ทำแบบประเมินใหม่</button>
+          </div>
+          <div class="actions" style="margin-top:6px">
+            ${Cosmic.lineButton('จองคิว Personal Brand Coaching', 'btn-gold', 'cta_coaching')}
+            ${Cosmic.lineButton('ดูคอร์สสร้าง Personal Brand', 'btn-line', 'cta_course')}
+          </div>
+        </section>
+
+        <p class="disclaimer">${esc(data.public_disclaimer)}</p>
+        <p class="slogan-line">Find Your Light. Build Your Brand.</p>
+      </div>`;
+
+    app.querySelectorAll('[data-tab]').forEach(b=>b.onclick = ()=>{ S.tab = b.dataset.tab; save(); renderResult(); });
+    document.getElementById('share').onclick = ()=>{ track('share'); shareCard(code); };
+    document.getElementById('pdf').onclick = ()=>{ track('pdf'); printResult(); };
+    document.getElementById('copy').onclick = copyLink;
+    document.getElementById('retake').onclick = ()=>{ S = fresh(); Cosmic.newSession(); go(0); };
+    app.querySelectorAll('a[data-track]').forEach(a=>a.addEventListener('click', ()=>track(a.dataset.track)));
+  }
+
+  // ----- PDF: browser print → "Save as PDF" -----
+  function printResult(){
+    const closed = [...app.querySelectorAll('details:not([open])')];
+    closed.forEach(d=>d.open = true);
+    window.addEventListener('afterprint', ()=>closed.forEach(d=>d.open = false), {once:true});
+    window.print();
+  }
+
+  async function copyLink(){
+    const url = location.origin + location.pathname;
+    track('copy_link');
+    try{ await navigator.clipboard.writeText(url); Cosmic.toast('คัดลอกลิงก์แล้ว'); }
+    catch(e){ window.prompt('คัดลอกลิงก์นี้', url); }
+  }
+
+  // ----- Share card 9:16 (1080×1920 PNG, no per-question answers) -----
+  function wrapLines(ctx, text, maxW){
+    const seg = (window.Intl && Intl.Segmenter) ? [...new Intl.Segmenter('th', {granularity:'word'}).segment(text)].map(s=>s.segment) : [...text];
+    const lines = []; let line = '';
+    for(const w of seg){
+      const test = line + w;
+      if(ctx.measureText(test).width > maxW && line){ lines.push(line.trim()); line = w.trimStart(); }
+      else line = test;
+    }
+    if(line.trim()) lines.push(line.trim());
+    return lines;
+  }
+  function loadSvg(markup, size, color){
+    const src = markup.replace(/currentColor/g, color).replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" `);
+    return new Promise((ok, bad)=>{ const im = new Image(); im.onload = ()=>ok(im); im.onerror = bad; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src); });
+  }
+  async function shareCard(code){
+    const t = data.types[code];
+    const NAVY = '#1A2947', DEEP = '#101A2F', GOLD = '#BE9261', LGOLD = '#DCC6A4', OFF = '#F4EFE8';
+    try{ await Promise.all(['300 40px Prompt','400 40px Prompt','500 40px Prompt'].map(f=>document.fonts.load(f))); }catch(e){}
+    const W = 1080, H = 1920, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    const g = x.createLinearGradient(0,0,0,H); g.addColorStop(0, NAVY); g.addColorStop(1, DEEP);
+    x.fillStyle = g; x.fillRect(0,0,W,H);
+    // stars (fixed pattern)
+    for(let k=0;k<90;k++){
+      const sx = (k*397)%W, sy = (k*733)%H, r = (k%3)+1.2;
+      x.globalAlpha = .35 + (k%4)*.15; x.fillStyle = k%5===0 ? GOLD : LGOLD;
+      x.beginPath(); x.arc(sx, sy, r, 0, Math.PI*2); x.fill();
+    }
+    x.globalAlpha = 1;
+    // frame
+    x.strokeStyle = GOLD; x.lineWidth = 3; x.beginPath(); x.roundRect ? x.roundRect(56,56,W-112,H-112,40) : x.rect(56,56,W-112,H-112); x.stroke();
+
+    x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+    const text = (s, y, font, color, spacing) => { x.font = font; x.fillStyle = color; if('letterSpacing' in x) x.letterSpacing = spacing || '0px'; x.fillText(s, W/2, y); };
+    text('MY COSMIC IDENTITY', 250, '500 40px Prompt', GOLD, '10px');
+    // icon
+    x.fillStyle = 'rgba(220,198,164,.10)'; x.beginPath(); x.arc(W/2, 560, 210, 0, Math.PI*2); x.fill();
+    x.strokeStyle = 'rgba(190,146,97,.6)'; x.lineWidth = 2; x.stroke();
+    try{ const im = await loadSvg(ICONS[code], 280, GOLD); x.drawImage(im, W/2-140, 420, 280, 280); }catch(e){}
+    text(t.display_name, 930, '500 116px Prompt', OFF, '2px');
+    text(t.symbol, 1010, '400 42px Prompt', LGOLD, '12px');
+    // share line: "headline | sub"
+    const [head, sub = ''] = t.share.split('|').map(s=>s.trim());
+    x.font = '500 58px Prompt'; let y = 1160;
+    for(const ln of wrapLines(x, head, 880)){ text(ln, y, '500 58px Prompt', OFF); y += 84; }
+    y += 10; x.font = '300 42px Prompt';
+    for(const ln of wrapLines(x, sub, 860)){ text(ln, y, '300 42px Prompt', LGOLD); y += 66; }
+    // signature power pill
+    x.font = '500 46px Prompt'; if('letterSpacing' in x) x.letterSpacing = '1px';
+    const pw = x.measureText(t.signature_power).width + 100, py = Math.max(y + 60, 1480);
+    x.fillStyle = GOLD; x.beginPath(); x.roundRect ? x.roundRect(W/2-pw/2, py, pw, 96, 48) : x.rect(W/2-pw/2, py, pw, 96); x.fill();
+    text(t.signature_power, py + 63, '500 46px Prompt', DEEP, '1px');
+    // brand
+    text('Coach Mew Mastermind', 1730, '500 44px Prompt', OFF, '2px');
+    text('Find Your Light. Build Your Brand.', 1792, '400 32px Prompt', GOLD, '4px');
+
+    const blob = await new Promise(ok=>c.toBlob(ok, 'image/png'));
+    const file = new File([blob], `my-cosmic-identity-${t.display_name.replace(/\s+/g,'-').toLowerCase()}.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'My Cosmic Identity', text:t.share}); return; }
+      catch(e){ if(e && e.name === 'AbortError') return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    Cosmic.toast('บันทึกการ์ดแล้ว');
+  }
+
+  render();
+})();
 </script>
 </body>
 </html>
