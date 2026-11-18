@@ -248,9 +248,7 @@
                 <span class="symbol">${esc(t.symbol)}</span>
               </div>
             </div>
-            <div class="face back tarot c-lgold" aria-hidden="true">
-              <span class="t-frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></span>
-              <span class="t-rule" aria-hidden="true"><b>✦</b></span>
+            <div class="face back c-lgold" aria-hidden="true">
               <span class="back-head">${esc(t.display_name)} · ${esc(t.symbol)}</span>
               <div class="back-block">
                 <b>Your Cosmic Power</b>
@@ -513,11 +511,13 @@
   }
   function drawBack(t){
     const c = document.createElement('canvas'); c.width = CW; c.height = CH; const x = c.getContext('2d');
-    tarotFrame(x, PAL.NAVY, PAL.LGOLD);
-    const L = 120, MAXW = CW - 2*L;
+    // back is plain on purpose: no frame, corner stars or rule behind the text (easier to read)
+    rrect(x, 0, 0, CW, CH, 80); x.fillStyle = PAL.LGOLD; x.fill();
+    x.strokeStyle = PAL.NAVY; x.lineWidth = 6; rrect(x, 18, 18, CW-36, CH-36, 66); x.stroke();
+    const L = 110, MAXW = CW - 2*L;
     // lay out once to measure, shrink the text if it would run past the frame
     const layout = (k, draw) => {
-      let y = 250;
+      let y = 170;
       const head = (s) => { if(draw) txt(x, s, L, y, `500 ${46*k}px Prompt`, PAL.DEEP, '0px', 'left'); y += 66*k; };
       const rule = () => { if(draw){ x.strokeStyle = 'rgba(16,26,47,.25)'; x.lineWidth = 2; x.beginPath(); x.moveTo(L, y); x.lineTo(CW-L, y); x.stroke(); } y += 70*k; };
       if(draw) txt(x, `${t.display_name} · ${t.symbol}`.toUpperCase(), L, y, `500 ${36*k}px Prompt`, PAL.NAVY, '8px', 'left');

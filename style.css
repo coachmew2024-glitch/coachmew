@@ -455,7 +455,7 @@ footer{background:var(--brand-deep-navy);color:rgba(244,239,232,.8);padding-bloc
 .flip-card .front .tag{font-size:15px;color:rgba(244,239,232,.85);max-width:30ch;margin:0}
 .t-name{display:grid;justify-items:center;gap:2px;width:100%;margin-top:8px;padding-top:12px;border-top:1px solid var(--t-line)}
 .t-name h1{font-size:clamp(30px,8vw,40px);letter-spacing:.12em;text-transform:uppercase;line-height:1.2}
-.flip-card .back.tarot{padding:30px 30px 26px}
+.flip-card .back{padding:30px 26px 26px;border-color:var(--brand-navy)}
 
 /* gentle wobble now and then so people notice the card can turn */
 .flip-card[data-flipped="false"]:not(:hover){animation:cardIn 1s cubic-bezier(.2,.8,.2,1) backwards,nudge 6s ease-in-out 3s infinite}
@@ -465,3 +465,9 @@ footer{background:var(--brand-deep-navy);color:rgba(244,239,232,.8);padding-bloc
   .flip-card,.flip-card[data-flipped="true"]{transform:none!important;animation:none!important;display:grid;gap:16px;width:100%}
   .flip-card .face{grid-area:auto;transform:none!important;backface-visibility:visible;min-height:0;break-inside:avoid}.stars::before,.stars::after,.meteors,.sparkles,.btn-gold::after,.bar i::after{display:none}
   .hero h1 span{-webkit-text-fill-color:currentColor;background:none}}
+
+/* Coach bio (Home #coach) */
+.coach-bio{display:grid;gap:14px}
+.coach-bio .lead{margin:0}
+.coach-bio .bio-close{margin:4px 0 0;font-size:clamp(18px,2.4vw,21px);font-weight:500;color:var(--head);border-left:3px solid var(--brand-gold);padding-left:14px}
+.coach-bio .eyebrow{margin:0}
