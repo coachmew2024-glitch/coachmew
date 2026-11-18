@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Coach Mew Mastermind · Find Your Light. Build Your Brand.</title>
-<meta name="description" content="ค้นพบดาวประจำตัวของคุณฟรีกับ Cosmic Identity แบบประเมินเพื่อสำรวจสไตล์การสื่อสารและ Personal Brand โดยครูมิว">
+<meta name="description" content="ค้นพบดาวประจำตัวของคุณฟรีกับ Cosmic Identity แบบประเมินเพื่อสำรวจสไตล์การสื่อสารและ Personal Brand โดยโค้ชมิว">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
@@ -20,49 +20,48 @@
     </a>
     <ul class="menu" id="menu">
       <li><a href="index.html" aria-current="page">หน้าแรก</a></li>
-      <li><a href="#coach">รู้จักครูมิว</a></li>
+      <li><a href="#coach">รู้จักโค้ชมิว</a></li>
       <li><a href="quiz.html">ค้นหาดาวของคุณ</a></li>
       <li><a href="#coaching">Coaching</a></li>
       <li><a href="#course">คอร์สออนไลน์</a></li>
     </ul>
-    <a class="btn btn-gold nav-cta" href="quiz.html">ค้นพบดาวประจำตัวฟรี</a>
+    <a class="btn btn-gold nav-cta" href="quiz.html">ค้นพบดาวประจำตัว</a>
     <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
   </div>
 </header>
 
 <main>
   <!-- 1. HERO -->
-  <section class="hero dark stars">
+  <section class="hero s-navy stars">
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <span class="eyebrow">Find Your Light. Build Your Brand.</span>
         <h1>ทุกคนมี<span>แสง</span><br>ในแบบของตัวเอง</h1>
         <p class="lead">ค้นพบตัวตน สร้างแบรนด์ในแบบที่เป็นคุณ กับเพื่อนร่วมทางในการสร้างตัวตน</p>
-        <a class="btn btn-gold" href="quiz.html">ค้นพบดาวประจำตัวฟรี</a>
-        <p class="meta">12 คำถาม • 3–5 นาที • ผลฟรีทันที</p>
+        <a class="btn btn-gold" href="quiz.html">ค้นพบดาวประจำตัว</a>
+        <p class="meta" id="heroMeta">16 คำถาม • 4–6 นาที • ผลฟรีทันที</p>
       </div>
-      <!-- TODO: ใส่รูปครูมิวจริง แทนกล่องนี้ เช่น <img src="images/coach-mew.webp" alt="ครูมิว" class="photo-slot"> -->
-      <div class="photo-slot">ใส่รูปครูมิว<br>(แนวตั้ง 4:5)</div>
+      <img src="images/coach-mew-hero.webp" alt="โค้ชมิว" class="photo-slot photo" width="800" height="1000" fetchpriority="high">
     </div>
   </section>
 
   <!-- 2. ใครเหมาะกับที่นี่ -->
-  <section id="for-you">
+  <section id="for-you" class="s-navy" style="padding-top:24px">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">ใครเหมาะกับที่นี่</span>
-        <h2>มีของดีอยู่แล้ว แต่ยังไม่รู้จะสื่อสารตัวเองยังไง</h2>
+        <span class="eyebrow th">ใครเหมาะกับที่นี่</span>
+        <h2>มีของดีอยู่แล้ว แต่ยังไม่รู้จะสื่อสารตัวเองอย่างไร</h2>
       </div>
       <div class="grid grid-3">
-        <article class="card"><h3>เจ้าของธุรกิจ</h3><p>สินค้าดี แต่สื่อสารความต่างได้ไม่ชัด และยังไม่มีทิศทางคอนเทนต์</p></article>
-        <article class="card"><h3>คนทำงาน / Sales</h3><p>มีความรู้และประสบการณ์ แต่ไม่รู้จะสื่อสารจุดแข็งของตัวเองยังไง</p></article>
-        <article class="card"><h3>Creator มือใหม่</h3><p>ไม่รู้จะพูดอะไร ใช้แพลตฟอร์มไหน และใช้ AI ช่วยยังไง</p></article>
+        <article class="card c-lgold"><h3>เจ้าของธุรกิจ</h3><p>สินค้าดี แต่สื่อสารความต่างได้ไม่ชัด และยังไม่มีทิศทางคอนเทนต์</p></article>
+        <article class="card c-lgold"><h3>คนทำงาน / Sales</h3><p>มีความรู้และประสบการณ์ แต่ไม่รู้จะสื่อสารจุดแข็งของตัวเองอย่างไร</p></article>
+        <article class="card c-lgold"><h3>Creator มือใหม่</h3><p>ไม่รู้จะพูดอะไร ใช้แพลตฟอร์มไหน และใช้ AI ช่วยอย่างไร</p></article>
       </div>
     </div>
   </section>
 
   <!-- 3. แนะนำ Cosmic Identity + การ์ด 4 ดาว (ข้อความจาก data/cosmic-identity.json) -->
-  <section id="stars" class="dark stars">
+  <section id="stars" class="s-lgold">
     <div class="wrap">
       <div class="sec-head center">
         <span class="eyebrow">Cosmic Identity</span>
@@ -71,49 +70,49 @@
       </div>
       <div class="grid grid-4" id="starCards" aria-live="polite"></div>
       <div class="center" style="display:grid;margin-top:32px">
-        <a class="btn btn-gold" href="quiz.html">ค้นพบดาวประจำตัวฟรี</a>
+        <a class="btn btn-dark" href="quiz.html">ค้นพบดาวประจำตัว</a>
       </div>
     </div>
   </section>
 
   <!-- 4. ทำแบบประเมินแล้วได้อะไร -->
-  <section id="get">
+  <section id="get" class="s-navy">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">ทำแบบประเมินแล้วได้อะไร</span>
+        <span class="eyebrow th">ทำแบบประเมินแล้วได้อะไร</span>
         <h2>ผลฟรี อ่านได้ทันทีบนเว็บ</h2>
       </div>
       <div class="grid grid-4">
-        <article class="card"><span class="num">01</span><h3>รู้ดาวประจำตัว</h3><p>รู้ว่าพลังการสื่อสารแบบไหนที่เป็นธรรมชาติของคุณ</p></article>
-        <article class="card"><span class="num">02</span><h3>จุดแข็งและข้อระวัง</h3><p>เห็นทั้งพลังที่ควรใช้ และมุมที่ควรระวังเวลาสื่อสาร</p></article>
-        <article class="card"><span class="num">03</span><h3>โจทย์คอนเทนต์แรก</h3><p>ได้ไอเดียคอนเทนต์ที่เริ่มทำได้เลย ตามสไตล์ของคุณ</p></article>
-        <article class="card"><span class="num">04</span><h3>อ่านผลฟรีบนเว็บ</h3><p>ไม่ต้องกรอกอีเมล ตอบครบแล้วเห็นผลทันที</p></article>
+        <article class="card c-lgold"><span class="num">01</span><h3>รู้ดาวประจำตัว</h3><p>รู้ว่าพลังการสื่อสารแบบไหนที่เป็นธรรมชาติของคุณ</p></article>
+        <article class="card c-lgold"><span class="num">02</span><h3>จุดแข็งและข้อระวัง</h3><p>เห็นทั้งพลังที่ควรใช้ และมุมที่ควรระวังเวลาสื่อสาร</p></article>
+        <article class="card c-lgold"><span class="num">03</span><h3>โจทย์คอนเทนต์แรก</h3><p>ได้ไอเดียคอนเทนต์ที่เริ่มทำได้เลย ตามสไตล์ของคุณ</p></article>
+        <article class="card c-lgold"><span class="num">04</span><h3>อ่านผลฟรีบนเว็บ</h3><p>ไม่ต้องกรอกอีเมล ตอบครบแล้วเห็นผลทันที</p></article>
       </div>
     </div>
   </section>
 
   <!-- 5. Meet Coach Mew -->
-  <section id="coach" style="padding-top:0">
+  <section id="coach" class="s-navy">
     <div class="wrap coach-grid">
-      <!-- TODO: ใส่รูปครูมิวจริง -->
-      <div class="photo-slot light">ใส่รูปครูมิว<br>(แนวตั้ง 4:5)</div>
+      <!-- TODO: ใส่รูปโค้ชมิวจริง -->
+      <img src="images/coach-mew-about.webp" alt="โค้ชมิว" class="photo-slot photo" width="800" height="1000" loading="lazy">
       <div style="display:grid;gap:16px">
         <span class="eyebrow">Meet Coach Mew</span>
-        <h2 style="font-size:clamp(26px,4vw,38px)">ครูมิว เพื่อนร่วมทางในการสร้างตัวตน</h2>
+        <h2 style="font-size:clamp(26px,4vw,38px)">โค้ชมิว เพื่อนร่วมทางในการสร้างตัวตน</h2>
         <ul class="tags">
           <li>อดีตครูคอมพิวเตอร์</li>
           <li>คุณแม่</li>
           <li>ผู้ประกอบการ</li>
           <li>ผู้ศึกษา Coaching</li>
         </ul>
-        <p class="lead">ครูมิวเชื่อว่าแบรนด์ที่ยั่งยืนเริ่มจากการเข้าใจตัวเอง และใช้ AI เป็นเครื่องมือช่วยเล่าเรื่องของคุณ ไม่ใช่แทนที่ตัวคุณ</p>
-        <!-- TODO: ใส่ประวัติ/ผลงานครูมิวที่ยืนยันแล้ว (ห้ามใส่ตัวเลขที่ยังไม่ยืนยัน) -->
+        <p class="lead">โค้ชมิวเชื่อว่าแบรนด์ที่ยั่งยืนเริ่มจากการเข้าใจตัวเอง และใช้ AI เป็นเครื่องมือช่วยเล่าเรื่องของคุณ ไม่ใช่แทนที่ตัวคุณ</p>
+        <!-- TODO: ใส่ประวัติ/ผลงานโค้ชมิวที่ยืนยันแล้ว (ห้ามใส่ตัวเลขที่ยังไม่ยืนยัน) -->
       </div>
     </div>
   </section>
 
   <!-- 6. Journey -->
-  <section id="journey" class="dark">
+  <section id="journey" class="s-lgold">
     <div class="wrap">
       <div class="sec-head center">
         <span class="eyebrow">Your Journey</span>
@@ -129,22 +128,22 @@
   </section>
 
   <!-- 7. ทางเลือกบริการ (ราคายังไม่ล็อก — ยังไม่แสดง) -->
-  <section id="services">
+  <section id="services" class="s-navy">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">ทางเลือกต่อจากผลฟรี</span>
+        <span class="eyebrow th">ทางเลือกต่อจากผลฟรี</span>
         <h2>เลือกเส้นทางที่เหมาะกับคุณ</h2>
-        <p class="lead">ไม่บังคับ เลือกได้ตามจังหวะของคุณเอง</p>
+        <p class="lead">เลือกได้ตามจังหวะของคุณเอง</p>
       </div>
       <div class="grid grid-2">
-        <article class="card" id="coaching">
-          <span class="num">1:1 กับครูมิว</span>
+        <article class="card c-lgold" id="coaching">
+          <span class="num th">1:1 กับโค้ชมิว</span>
           <h3>Personal Brand Coaching</h3>
-          <p>คุยกับครูมิวตัวต่อตัว ตั้งแต่ Self-Discovery, Brand Clarity, Audience Direction จนได้ Action Plan ของคุณเอง</p>
-          <span data-line="สอบถามทาง LINE" data-track="cta_coaching" class="btn btn-gold"></span>
+          <p>คุยกับโค้ชมิวตัวต่อตัว ตั้งแต่ Self-Discovery, Brand Clarity, Audience Direction จนได้ Action Plan ของคุณเอง</p>
+          <span data-line="สอบถามทาง LINE" data-track="cta_coaching" class="btn btn-dark"></span>
         </article>
-        <article class="card" id="course">
-          <span class="num">เรียนตามจังหวะตัวเอง</span>
+        <article class="card c-lgold" id="course">
+          <span class="num th">เรียนตามจังหวะตัวเอง</span>
           <h3>Online Course</h3>
           <p>Discover → Plan, Create → Produce และ Present → Grow พร้อม Workbook ใช้ AI ช่วยทำคอนเทนต์ ภาพ และตัดต่อ</p>
           <span data-line="สอบถามทาง LINE" data-track="cta_course" class="btn btn-line"></span>
@@ -154,12 +153,12 @@
   </section>
 
   <!-- 8. FAQ -->
-  <section id="faq" style="padding-top:0">
+  <section id="faq" class="s-off">
     <div class="wrap">
       <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>คำถามที่พบบ่อย</h2></div>
       <div class="faq">
         <details class="qa"><summary>เริ่มจากศูนย์ได้ไหม?</summary><p>ได้ค่ะ แบบประเมินและเนื้อหาออกแบบมาสำหรับมือใหม่ เริ่มจากรู้จักดาวประจำตัวก่อนก็พอ</p></details>
-        <details class="qa"><summary>ฟรีจริงไหม?</summary><p>ผลเบื้องต้นของ Cosmic Identity ฟรี อ่านได้ทันทีบนเว็บหลังตอบครบ 12 ข้อ</p></details>
+        <details class="qa"><summary>ฟรีจริงไหม?</summary><p>ผลเบื้องต้นของ Cosmic Identity ฟรี อ่านได้ทันทีบนเว็บหลังตอบครบทุกข้อ</p></details>
         <details class="qa"><summary>ต้องทำ Coaching ไหม?</summary><p>ไม่จำเป็นค่ะ Coaching และคอร์สออนไลน์เป็นทางเลือกสำหรับคนที่อยากไปต่อ</p></details>
         <details class="qa"><summary>ไทป์เปลี่ยนได้ไหม?</summary><p>ผลเป็นแนวโน้มจากคำตอบในตอนนั้น ไม่ใช่กรอบตายตัว และทุกคนมีพลังของหลายดาวอยู่ในตัวได้</p></details>
         <details class="qa"><summary>ต้องเก่ง AI ไหม?</summary><p>ไม่จำเป็นค่ะ AI เป็นแค่เครื่องมือช่วย หัวใจของแบรนด์คือตัวคุณ</p></details>
@@ -168,7 +167,7 @@
   </section>
 
   <!-- 9. FINAL CTA -->
-  <section class="dark stars">
+  <section class="s-navy stars">
     <div class="wrap final">
       <span class="eyebrow">Find Your Light. Build Your Brand.</span>
       <h2>ดวงดาวของคุณกำลังรอให้ค้นพบ</h2>
@@ -194,17 +193,22 @@
 // การ์ด 4 ดาว: ชื่อ, สัญลักษณ์, signature_power จาก JSON
 Cosmic.loadData().then(data=>{
   const {esc, ICONS} = Cosmic;
+  // hero line from JSON: number of questions + estimated minutes
+  const ui = data.assessment_ui || {}, mins = String(ui.estimated_minutes || '').split(' ')[0];
+  document.getElementById('heroMeta').textContent = `${data.questions.length} คำถาม • ${mins ? mins + ' นาที • ' : ''}ผลฟรีทันที`;
   document.getElementById('starCards').innerHTML = Object.entries(data.types).map(([code,t])=>`
-    <article class="card star-card" style="background:var(--brand-off-white);border-color:var(--brand-light-gold)">
+    <article class="card c-navy star-card">
       <span class="ico">${ICONS[code]}</span>
-      <h3 style="color:var(--brand-navy)">${esc(t.display_name)}</h3>
+      <h3>${esc(t.display_name)}</h3>
       <span class="sym">${esc(t.symbol)}</span>
       <span class="power">${esc(t.signature_power)}</span>
     </article>`).join('');
+  Cosmic.reveal(document.getElementById('starCards'));
 }).catch(err=>{
   console.error(err);
   document.getElementById('starCards').innerHTML = '<p class="lead">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง</p>';
 });
+Cosmic.reveal();   // sections rise in as you scroll
 document.addEventListener('click', e=>{ const t = e.target.closest('[data-track]'); if(t && t.dataset.track) Cosmic.track(t.dataset.track); });
 </script>
 </body>

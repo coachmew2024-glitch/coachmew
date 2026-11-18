@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cosmic Identity · Coach Mew Mastermind</title>
-<meta name="description" content="ทุกคนมีแสงในแบบของตัวเอง แล้วคุณล่ะ มีพลังของดวงดาวแบบไหน? 12 คำถาม ประมาณ 3–5 นาที ผลฟรีทันที">
+<meta name="description" content="ทุกคนมีแสงในแบบของตัวเอง แล้วคุณล่ะ มีพลังของดวงดาวแบบไหน? 16 คำถาม ประมาณ 4–6 นาที ผลฟรีทันที">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
@@ -20,7 +20,7 @@
     </a>
     <ul class="menu" id="menu">
       <li><a href="index.html">หน้าแรก</a></li>
-      <li><a href="index.html#coach">รู้จักครูมิว</a></li>
+      <li><a href="index.html#coach">รู้จักโค้ชมิว</a></li>
       <li><a href="quiz.html" aria-current="page">ค้นหาดาวของคุณ</a></li>
       <li><a href="index.html#coaching">Coaching</a></li>
       <li><a href="index.html#course">คอร์สออนไลน์</a></li>
@@ -29,9 +29,9 @@
   </div>
 </header>
 
-<main class="quiz-page stars">
+<main class="quiz-page s-navy stars">
   <div class="wrap" id="app" aria-live="polite">
-    <div class="panel center-panel"><p>กำลังโหลดแบบประเมิน...</p></div>
+    <div class="panel center-panel c-deep"><p>กำลังโหลดแบบประเมิน...</p></div>
   </div>
 </main>
 
@@ -54,15 +54,22 @@
   try{ data = await Cosmic.loadData(); }
   catch(err){
     console.error(err);
-    app.innerHTML = '<div class="panel center-panel"><p>โหลดแบบประเมินไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง</p></div>';
+    app.innerHTML = '<div class="panel center-panel c-deep"><p>โหลดแบบประเมินไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง</p></div>';
     return;
   }
 
-  const Q = data.questions, N = Q.length;                      // 12
+  const Q = data.questions, N = Q.length;                      // 16 in the current JSON
   const qIndex = Object.fromEntries(Q.map((q,i)=>[q.id,i]));
   const pad = n => String(n).padStart(2,'0');
+  // Button / screen text from JSON → assessment_ui (fallbacks only if a key is missing)
+  const UI = Object.assign({
+    welcome:'', instruction:'เลือกเพียง 1 คำตอบที่ใกล้เคียงสิ่งที่คุณมักทำจริงที่สุด ไม่มีถูกหรือผิด',
+    start:'เริ่มทำแบบประเมิน', next:'ข้อถัดไป', back:'ย้อนกลับ',
+    completion:`คุณตอบครบทั้ง ${N} ข้อแล้ว`, reveal:'เปิดเผย Cosmic Identity ของฉัน', estimated_minutes:''
+  }, data.assessment_ui || {});
+  const minutes = String(UI.estimated_minutes).split(' ')[0];   // "4–6 (estimate; …)" → "4–6"
 
-  // Screen order: welcome → [chapter intro → its questions] ×3 → complete → result
+  // Screen order: welcome (Brand Story + welcome) → [chapter intro → its questions] × chapters → complete → result
   const SCREENS = [{k:'welcome'}];
   data.chapters.forEach((ch,ci)=>{
     SCREENS.push({k:'chapter', ci});
@@ -88,29 +95,43 @@
     else if(s.k === 'q') renderQuestion(s.i, s.ci);
     else if(s.k === 'complete') renderComplete();
     else renderResult();
+    Cosmic.screenIn(app);                               // soft fade-up for every new screen
+    Cosmic.reveal(app);                                 // story paragraphs / result cards rise in on scroll
     window.scrollTo({top:0, behavior:'auto'});
     const h = app.querySelector('h1,h2');
     if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
   }
 
+  // ----- Brand Story (JSON → brand_story, shown in full before the welcome) -----
+  function storyHTML(){
+    const b = data.brand_story;
+    if(!b) return '';
+    return `
+      <section class="story" aria-labelledby="storyH">
+        <span class="story-label">${esc(b.section_label)}</span>
+        <h1 class="story-h" id="storyH">${esc(b.headline)}</h1>
+        <div class="story-cols">${b.paragraphs.map(p=>`<p>${esc(p)}</p>`).join('')}</div>
+        <p class="story-close">${esc(b.closing_quote)}</p>
+      </section>`;
+  }
+
   // ----- Welcome -----
   function renderWelcome(){
     track('welcome', {}, true);
-    app.innerHTML = `
-      <div class="panel center-panel">
+    const H = data.brand_story ? 'h2' : 'h1';
+    app.innerHTML = storyHTML() + `
+      <div class="panel center-panel c-deep">
         <span class="ico ico-lg">${ICONS.logo}</span>
         <span class="eyebrow">Cosmic Identity</span>
-        <h1 style="font-size:clamp(24px,6vw,34px)">ทุกคนมีแสงในแบบของตัวเอง<br>แล้วคุณล่ะ มีพลังของดวงดาวแบบไหน?</h1>
-        <p class="lead">ออกเดินทางผ่าน 12 สถานการณ์ในจักรวาล แล้วค้นพบว่าคุณมีแนวโน้มสื่อสารและสร้างแบรนด์ในแบบไหน</p>
-        <div class="pill-row"><span>12 คำถาม</span><span>ประมาณ 3–5 นาที</span><span>ไม่มีถูกหรือผิด</span></div>
+        <${H} style="font-size:clamp(24px,6vw,34px)">ทุกคนมีแสงในแบบของตัวเอง<br>แล้วคุณล่ะ มีพลังของดวงดาวแบบไหน?</${H}>
+        ${UI.welcome ? `<p class="lead">${esc(UI.welcome)}</p>` : ''}
+        <div class="pill-row"><span>${N} คำถาม</span>${minutes ? `<span>ประมาณ ${esc(minutes)} นาที</span>` : ''}<span>ไม่มีถูกหรือผิด</span></div>
         <ul class="tips">
-          <li>เลือก 1 คำตอบต่อข้อ</li>
-          <li>เลือกสิ่งที่คุณ “มักทำจริง” มากกว่าสิ่งที่อยากเป็น</li>
-          <li>ไม่มีคำตอบถูกหรือผิด</li>
+          <li>${esc(UI.instruction)}</li>
           <li>แก้คำตอบได้ก่อนส่ง</li>
           <li>เป็นแบบประเมินเพื่อสำรวจตนเอง (Self-Reflection) ไม่ใช่การวินิจฉัย</li>
         </ul>
-        <button type="button" class="btn btn-gold btn-block" id="start">เริ่มค้นหาดาวของฉัน</button>
+        <button type="button" class="btn btn-gold btn-block" id="start">${esc(UI.start)}</button>
       </div>`;
     document.getElementById('start').onclick = ()=>{ track('start'); go(1); };
   }
@@ -119,13 +140,13 @@
   function renderChapter(ci){
     const ch = data.chapters[ci];
     app.innerHTML = `
-      <div class="chapter-wrap">
+      <div class="chapter-wrap c-lgold">
         <span class="chapter-no">CHAPTER ${ch.id}</span>
         <h1 class="chapter-name">${esc(ch.name)}</h1>
         <p class="chapter-th">${esc(ch.title_th)}</p>
         <p class="intro">${esc(ch.intro)}</p>
-        <button type="button" class="btn btn-gold" id="next">ภารกิจถัดไป</button>
-        <button type="button" class="link-btn" id="back" style="color:var(--brand-light-gold)">ย้อนกลับ</button>
+        <button type="button" class="btn btn-dark" id="next">${esc(UI.next)}</button>
+        <button type="button" class="link-btn" id="back">${esc(UI.back)}</button>
       </div>`;
     document.getElementById('next').onclick = ()=>go(S.pos+1);
     document.getElementById('back').onclick = ()=>go(S.pos-1);
@@ -135,48 +156,48 @@
   function renderQuestion(i, ci){
     const q = Q[i], ch = data.chapters[ci], picked = S.answers[i];
     app.innerHTML = `
-      <div class="panel">
+      <div class="panel c-deep">
         <div class="q-head">
           <div class="q-meta"><b>CHAPTER ${ch.id} · ${esc(ch.name)}</b><span>ข้อ ${pad(i+1)}/${N}</span></div>
           <div class="bar" role="progressbar" aria-label="ความคืบหน้า" aria-valuemin="0" aria-valuemax="${N}" aria-valuenow="${i+1}"><i style="width:${(i+1)/N*100}%"></i></div>
         </div>
         <p class="q-title">${esc(q.title)}</p>
         <h2 class="q-prompt" id="qp">${esc(q.prompt)}</h2>
-        <fieldset class="opts" aria-labelledby="qp">
+        <div class="opts" role="group" aria-labelledby="qp">
           ${q.answers.map(a=>`
-            <label class="opt">
-              <input type="radio" name="ans" value="${esc(a.option)}"${picked===a.option?' checked':''}>
+            <button type="button" class="opt" data-opt="${esc(a.option)}" aria-pressed="${picked===a.option}">
               <span class="letter">${esc(a.option)}</span>
               <span class="txt">${esc(a.text)}</span>
-            </label>`).join('')}
-        </fieldset>
+            </button>`).join('')}
+        </div>
         <div class="q-nav">
-          <button type="button" class="link-btn" id="back">ย้อนกลับ</button>
-          <button type="button" class="btn btn-gold" id="next"${picked?'':' disabled'}>ภารกิจถัดไป</button>
+          <button type="button" class="btn btn-line btn-back" id="back">← ${esc(UI.back)}</button>
         </div>
       </div>`;
-    const next = document.getElementById('next');
-    app.querySelectorAll('input[name="ans"]').forEach(r=>r.addEventListener('change', ()=>{
-      S.answers[i] = r.value; S.saved = false; save(); next.disabled = false;
-    }));
-    next.onclick = ()=>{
-      if(!S.answers[i]) return;
+    // Tap an answer = go straight to the next screen (no confirm button). Back keeps the answer so it can be changed.
+    let moving = false;
+    app.querySelectorAll('.opt').forEach(b=>b.addEventListener('click', ()=>{
+      if(moving) return;
+      moving = true;
+      app.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed', x === b));
+      if(S.answers[i] !== b.dataset.opt) S.saved = false;
+      S.answers[i] = b.dataset.opt; save();
       track('answer', {question_no:i+1, option:S.answers[i]});
-      go(S.pos+1);
-    };
-    document.getElementById('back').onclick = ()=>go(S.pos-1);
+      setTimeout(()=>go(S.pos+1), 320);   // short pause so the choice is seen lighting up
+    }));
+    document.getElementById('back').onclick = ()=>{ if(!moving) go(S.pos-1); };
   }
 
   // ----- Completed -----
   function renderComplete(){
     track('complete', {}, true);
     app.innerHTML = `
-      <div class="panel center-panel">
+      <div class="panel center-panel c-lgold">
         <span class="ico ico-lg">${ICONS.logo}</span>
-        <h1 class="done-title" style="color:var(--brand-navy)">COSMIC MISSION COMPLETED!</h1>
-        <p class="lead">คุณเดินทางผ่านทั้ง 12 ภารกิจสำเร็จแล้ว ✨</p>
-        <button type="button" class="btn btn-gold btn-block" id="reveal">เปิดเผย Cosmic Identity ของฉัน</button>
-        <button type="button" class="link-btn" id="back">ย้อนกลับ</button>
+        <h1 class="done-title">COSMIC MISSION COMPLETED!</h1>
+        <p class="lead">${esc(UI.completion)} ✨</p>
+        <button type="button" class="btn btn-dark btn-block" id="reveal">${esc(UI.reveal)}</button>
+        <button type="button" class="link-btn" id="back">${esc(UI.back)}</button>
       </div>`;
     document.getElementById('reveal').onclick = ()=>{
       const r = Cosmic.score(data, S.answers);
@@ -202,23 +223,54 @@
     app.innerHTML = `
       <div class="result">
         ${tie ? `
-          <p class="tie-note">${esc(TIE_TEXT)}</p>
+          <p class="tie-note c-lgold">${esc(TIE_TEXT)}</p>
           <div class="tabs" role="tablist" aria-label="ดวงดาวที่โดดเด่นของคุณ">
             ${r.leading.map(c=>`<button type="button" class="tab" role="tab" aria-selected="${c===code}" data-tab="${c}">${esc(data.types[c].display_name)}</button>`).join('')}
           </div>` : ''}
 
-        <!-- 1. Hero -->
-        <div class="r-hero" role="${tie?'tabpanel':'region'}">
-          <span class="ico ico-lg">${ICONS[code]}</span>
-          <span class="kicker">YOUR COSMIC IDENTITY</span>
-          <h1>${esc(t.display_name)}</h1>
-          <span class="symbol">${esc(t.symbol)}</span>
-          <p class="title">${esc(t.title)}</p>
-          <p class="tag">${esc(t.tag)}</p>
+        <!-- 1. Flip card: front = who you are, back = quick summary (all text from JSON) -->
+        <div class="flip-wrap" role="${tie?'tabpanel':'region'}" aria-label="การ์ด Cosmic Identity">
+          <div class="flip-card" id="flip" data-flipped="false">
+            <div class="face front tarot r-hero c-deep" aria-hidden="false">
+              <span class="t-frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></span>
+              <span class="t-rule" aria-hidden="true"><b>✦</b></span>
+              <span class="kicker">YOUR COSMIC IDENTITY</span>
+              <span class="t-orbit" aria-hidden="true">
+                <i class="sp s1">✦</i><i class="sp s2">✦</i><i class="sp s3">✦</i><i class="sp s4">✦</i>
+                <span class="ico ico-lg">${ICONS[code]}</span>
+              </span>
+              <p class="title">${esc(t.title)}</p>
+              <p class="tag">${esc(t.tag)}</p>
+              <span class="power">${esc(t.signature_power)}</span>
+              <span class="card-score">${r.scores[code]} / ${r.total} คำตอบ</span>
+              <div class="t-name">
+                <h1>${esc(t.display_name)}</h1>
+                <span class="symbol">${esc(t.symbol)}</span>
+              </div>
+            </div>
+            <div class="face back tarot c-lgold" aria-hidden="true">
+              <span class="t-frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></span>
+              <span class="t-rule" aria-hidden="true"><b>✦</b></span>
+              <span class="back-head">${esc(t.display_name)} · ${esc(t.symbol)}</span>
+              <div class="back-block">
+                <b>Your Cosmic Power</b>
+                ${list(t.strength)}
+              </div>
+              <div class="back-block">
+                <b>Trust Style</b>
+                <span>${esc(t.trust_style)}</span>
+              </div>
+              <p class="back-quote">${esc(t.reminder)}</p>
+            </div>
+          </div>
+          <div class="card-actions no-print">
+            <button type="button" class="btn btn-line flip-btn" id="flipBtn" aria-controls="flip">↻ <span>พลิกดูด้านหลัง</span></button>
+            <button type="button" class="btn btn-gold flip-btn" id="saveCard">บันทึกการ์ด (หน้า + หลัง)</button>
+          </div>
         </div>
 
         <!-- 2. Score bars -->
-        <section class="r-card" aria-label="สัดส่วนคำตอบ">
+        <section class="r-card c-navy" aria-label="สัดส่วนคำตอบ">
           <h2>สัดส่วนคำตอบของคุณ</h2>
           <div class="scores">
             ${Object.keys(data.types).map(c=>`
@@ -227,11 +279,11 @@
                 <div class="bar"><i style="width:${r.scores[c]/r.total*100}%"></i></div>
               </div>`).join('')}
           </div>
-          <p class="small">ตัวเลขนี้คือสัดส่วนคำตอบจาก 12 สถานการณ์ ไม่ใช่ความแม่นยำของบุคลิกภาพ และทุกคนมีพลังของหลายดาวร่วมกันได้</p>
+          <p class="small">ตัวเลขนี้คือสัดส่วนคำตอบจาก ${N} สถานการณ์ ไม่ใช่ความแม่นยำของบุคลิกภาพ และทุกคนมีพลังของหลายดาวร่วมกันได้</p>
         </section>
 
         <!-- 3. Your Star Story -->
-        <section class="r-card">
+        <section class="r-card c-off">
           <h2>Your Star Story</h2>
           <p>${esc(first)}</p>
           ${rest.length ? `<details><summary>อ่านต่อ</summary><div class="stack">${rest.map(p=>`<p>${esc(p)}</p>`).join('')}</div></details>` : ''}
@@ -239,11 +291,11 @@
 
         <!-- 4. Cosmic Power + Trust Style -->
         <div class="split">
-          <section class="r-card">
+          <section class="r-card c-lgold">
             <h2>Your Cosmic Power</h2>
             ${list(t.strength)}
           </section>
-          <section class="r-card">
+          <section class="r-card c-lgold">
             <h2>Trust Style</h2>
             <h3>${esc(t.trust_style)}</h3>
             <p>${esc(t.trust)}</p>
@@ -251,19 +303,19 @@
         </div>
 
         <!-- 5. Content Universe + Shadow -->
-        <section class="r-card">
+        <section class="r-card c-navy">
           <h2>Your Content Universe</h2>
           ${list(t.content)}
           <p class="example"><b>ตัวอย่างหัวข้อ:</b> ${esc(t.example)}</p>
         </section>
-        <section class="r-card">
+        <section class="r-card c-off">
           <h2>Your Shadow</h2>
           <p>${esc(t.shadow)}</p>
           <p class="quote">${esc(t.shadowline)}</p>
         </section>
 
         <!-- 6. First Mission + Reminder -->
-        <section class="r-card">
+        <section class="r-card c-lgold">
           <h2>Your First Cosmic Mission</h2>
           ${list(t.missions)}
           <h3 style="margin-top:6px">Cosmic Reminder</h3>
@@ -271,16 +323,16 @@
         </section>
 
         <!-- 7. Share / PDF / CTA -->
-        <section class="r-card no-print">
+        <section class="r-card c-lgold no-print">
           <h2>ไปต่อจากผลของคุณ</h2>
           <div class="actions">
-            <button type="button" class="btn btn-gold" id="share">แชร์ดวงดาวของฉัน</button>
+            <button type="button" class="btn btn-dark" id="share">แชร์ดวงดาวของฉัน</button>
             <button type="button" class="btn btn-line" id="pdf">ดาวน์โหลดผลลัพธ์ PDF</button>
             <button type="button" class="btn btn-line" id="copy">คัดลอกลิงก์แบบทดสอบ</button>
             <button type="button" class="btn btn-line" id="retake">ทำแบบประเมินใหม่</button>
           </div>
           <div class="actions" style="margin-top:6px">
-            ${Cosmic.lineButton('จองคิว Personal Brand Coaching', 'btn-gold', 'cta_coaching')}
+            ${Cosmic.lineButton('จองคิว Personal Brand Coaching', 'btn-dark', 'cta_coaching')}
             ${Cosmic.lineButton('ดูคอร์สสร้าง Personal Brand', 'btn-line', 'cta_course')}
           </div>
         </section>
@@ -289,7 +341,18 @@
         <p class="slogan-line">Find Your Light. Build Your Brand.</p>
       </div>`;
 
-    app.querySelectorAll('[data-tab]').forEach(b=>b.onclick = ()=>{ S.tab = b.dataset.tab; save(); renderResult(); });
+    // Flip: tap the card or the button; only the visible face is read by screen readers
+    const flip = document.getElementById('flip'), flipBtn = document.getElementById('flipBtn');
+    const setFlip = on => {
+      flip.dataset.flipped = on;
+      flip.querySelector('.front').setAttribute('aria-hidden', on);
+      flip.querySelector('.back').setAttribute('aria-hidden', !on);
+      flipBtn.querySelector('span').textContent = on ? 'พลิกกลับด้านหน้า' : 'พลิกดูด้านหลัง';
+    };
+    flip.onclick = ()=>setFlip(flip.dataset.flipped !== 'true');
+    flipBtn.onclick = ()=>setFlip(flip.dataset.flipped !== 'true');
+    document.getElementById('saveCard').onclick = e=>saveCard(code, r, e.currentTarget);
+    app.querySelectorAll('[data-tab]').forEach(b=>b.onclick = ()=>{ S.tab = b.dataset.tab; save(); renderResult(); Cosmic.reveal(app); });
     document.getElementById('share').onclick = ()=>{ track('share'); shareCard(code); };
     document.getElementById('pdf').onclick = ()=>{ track('pdf'); printResult(); };
     document.getElementById('copy').onclick = copyLink;
@@ -381,6 +444,134 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
     Cosmic.toast('บันทึกการ์ดแล้ว');
+  }
+
+  // ----- Save the tarot card as 2 images (front + back), drawn to match the card on screen -----
+  const CW = 1080, CH = 1760;
+  const PAL = {NAVY:'#1A2947', DEEP:'#101A2F', GOLD:'#BE9261', LGOLD:'#DCC6A4', OFF:'#F4EFE8'};
+  function star4(x, cx, cy, s, color){
+    x.fillStyle = color; x.beginPath();
+    const p = [[0,-1],[.22,-.22],[1,0],[.22,.22],[0,1],[-.22,.22],[-1,0],[-.22,-.22]];
+    p.forEach(([a,b],k)=>{ const px = cx + a*s, py = cy + b*s; k ? x.lineTo(px,py) : x.moveTo(px,py); });
+    x.closePath(); x.fill();
+  }
+  function rrect(x, X, Y, w, h, r){ x.beginPath(); x.roundRect ? x.roundRect(X,Y,w,h,r) : x.rect(X,Y,w,h); }
+  function tarotFrame(x, line, fill){
+    rrect(x, 0, 0, CW, CH, 80); x.fillStyle = fill; x.fill();
+    x.strokeStyle = line; x.lineWidth = 6; rrect(x, 18, 18, CW-36, CH-36, 66); x.stroke();
+    x.globalAlpha = .85; x.lineWidth = 2.5; rrect(x, 58, 58, CW-116, CH-116, 16); x.stroke(); x.globalAlpha = 1;
+    [[58,58],[CW-58,58],[58,CH-58],[CW-58,CH-58]].forEach(([a,b])=>star4(x, a, b, 22, line));
+    // top rule with a star
+    x.strokeStyle = line; x.lineWidth = 2.5; x.globalAlpha = .8;
+    x.beginPath(); x.moveTo(120,150); x.lineTo(CW/2-46,150); x.moveTo(CW/2+46,150); x.lineTo(CW-120,150); x.stroke(); x.globalAlpha = 1;
+    star4(x, CW/2, 150, 18, line);
+  }
+  function txt(x, s, X, Y, font, color, spacing, align){
+    x.font = font; x.fillStyle = color; x.textAlign = align || 'center';
+    if('letterSpacing' in x) x.letterSpacing = spacing || '0px';
+    x.fillText(s, X, Y);
+  }
+  async function drawFront(t, code, r){
+    const c = document.createElement('canvas'); c.width = CW; c.height = CH; const x = c.getContext('2d');
+    tarotFrame(x, PAL.GOLD, PAL.DEEP);
+    const glow = x.createRadialGradient(CW/2, 0, 0, CW/2, 0, CW*.85);
+    glow.addColorStop(0, 'rgba(190,146,97,.30)'); glow.addColorStop(1, 'rgba(190,146,97,0)');
+    x.save(); rrect(x, 18, 18, CW-36, CH-36, 66); x.clip(); x.fillStyle = glow; x.fillRect(0,0,CW,CH);
+    for(let k=0;k<70;k++){ const sx = 70 + (k*397)%(CW-140), sy = 70 + (k*733)%(CH-140);
+      x.globalAlpha = .3 + (k%4)*.15; x.fillStyle = k%5===0 ? PAL.GOLD : PAL.LGOLD; x.beginPath(); x.arc(sx, sy, (k%3)+1.4, 0, Math.PI*2); x.fill(); }
+    x.restore(); x.globalAlpha = 1;
+    txt(x, 'YOUR COSMIC IDENTITY', CW/2, 262, '500 38px Prompt', PAL.GOLD, '12px');
+    // orbit
+    const oy = 580;
+    x.fillStyle = PAL.GOLD;
+    for(let a=0;a<360;a+=3){ const rad = a*Math.PI/180; x.globalAlpha = .8; x.beginPath(); x.arc(CW/2 + Math.cos(rad)*318, oy + Math.sin(rad)*318, 2.2, 0, Math.PI*2); x.fill(); }
+    x.globalAlpha = .75; x.strokeStyle = PAL.GOLD; x.lineWidth = 2.5; x.beginPath(); x.arc(CW/2, oy, 284, 0, Math.PI*2); x.stroke();
+    x.globalAlpha = .35; x.lineWidth = 2; x.beginPath(); x.arc(CW/2, oy, 232, 0, Math.PI*2); x.stroke(); x.globalAlpha = 1;
+    const halo = x.createRadialGradient(CW/2, oy, 120, CW/2, oy, 210);
+    halo.addColorStop(0, 'rgba(190,146,97,0)'); halo.addColorStop(.6, 'rgba(190,146,97,.28)'); halo.addColorStop(1, 'rgba(190,146,97,0)');
+    x.fillStyle = halo; x.beginPath(); x.arc(CW/2, oy, 210, 0, Math.PI*2); x.fill();
+    [[-210,-200,20],[250,-160,13],[-260,170,14],[190,230,20]].forEach(([dx,dy,s])=>star4(x, CW/2+dx, oy+dy, s, PAL.LGOLD));
+    try{ const im = await loadSvg(ICONS[code], 300, PAL.GOLD); x.drawImage(im, CW/2-150, oy-150, 300, 300); }catch(e){}
+    // words
+    let y = 1000;
+    x.font = '500 56px Prompt';
+    for(const ln of wrapLines(x, t.title, 880)){ txt(x, ln, CW/2, y, '500 56px Prompt', PAL.OFF); y += 76; }
+    y += 6; x.font = '300 40px Prompt';
+    for(const ln of wrapLines(x, t.tag, 820)){ txt(x, ln, CW/2, y, '300 40px Prompt', 'rgba(244,239,232,.88)'); y += 62; }
+    x.font = '500 44px Prompt'; if('letterSpacing' in x) x.letterSpacing = '1px';
+    const pw = x.measureText(t.signature_power).width + 96, py = y + 14;
+    x.fillStyle = PAL.GOLD; rrect(x, CW/2-pw/2, py, pw, 92, 46); x.fill();
+    txt(x, t.signature_power, CW/2, py + 61, '500 44px Prompt', PAL.DEEP, '1px');
+    txt(x, `${r.scores[code]} / ${r.total} คำตอบ`, CW/2, py + 160, '400 38px Prompt', PAL.LGOLD, '1px');
+    // name plate
+    x.strokeStyle = PAL.GOLD; x.lineWidth = 2.5; x.beginPath(); x.moveTo(110, CH-330); x.lineTo(CW-110, CH-330); x.stroke();
+    let size = 112; x.font = `500 ${size}px Prompt`; if('letterSpacing' in x) x.letterSpacing = '14px';
+    while(x.measureText(t.display_name.toUpperCase()).width > 820 && size > 60){ size -= 4; x.font = `500 ${size}px Prompt`; }
+    txt(x, t.display_name.toUpperCase(), CW/2, CH-200, `500 ${size}px Prompt`, PAL.OFF, '14px');
+    txt(x, t.symbol, CW/2, CH-128, '500 40px Prompt', PAL.GOLD, '14px');
+    return c;
+  }
+  function drawBack(t){
+    const c = document.createElement('canvas'); c.width = CW; c.height = CH; const x = c.getContext('2d');
+    tarotFrame(x, PAL.NAVY, PAL.LGOLD);
+    const L = 120, MAXW = CW - 2*L;
+    // lay out once to measure, shrink the text if it would run past the frame
+    const layout = (k, draw) => {
+      let y = 250;
+      const head = (s) => { if(draw) txt(x, s, L, y, `500 ${46*k}px Prompt`, PAL.DEEP, '0px', 'left'); y += 66*k; };
+      const rule = () => { if(draw){ x.strokeStyle = 'rgba(16,26,47,.25)'; x.lineWidth = 2; x.beginPath(); x.moveTo(L, y); x.lineTo(CW-L, y); x.stroke(); } y += 70*k; };
+      if(draw) txt(x, `${t.display_name} · ${t.symbol}`.toUpperCase(), L, y, `500 ${36*k}px Prompt`, PAL.NAVY, '8px', 'left');
+      y += 60*k; rule();
+      head('Your Cosmic Power');
+      x.font = `400 ${38*k}px Prompt`;
+      t.strength.forEach(s=>{
+        wrapLines(x, s, MAXW - 50).forEach((ln, j)=>{
+          if(draw){ if(!j){ x.fillStyle = PAL.DEEP; x.beginPath(); x.arc(L+12, y-13*k, 6*k, 0, Math.PI*2); x.fill(); }
+            txt(x, ln, L+46, y, `400 ${38*k}px Prompt`, PAL.DEEP, '0px', 'left'); }
+          y += 58*k;
+        });
+        y += 8*k;
+      });
+      y += 10*k; rule();
+      head('Trust Style');
+      if(draw) txt(x, t.trust_style, L, y, `400 ${40*k}px Prompt`, PAL.DEEP, '0px', 'left');
+      y += 90*k;
+      x.font = `400 ${38*k}px Prompt`;
+      const q = wrapLines(x, t.reminder, MAXW - 50), top = y - 44*k;
+      q.forEach(ln=>{ if(draw) txt(x, ln, L+40, y, `400 ${38*k}px Prompt`, PAL.DEEP, '0px', 'left'); y += 58*k; });
+      if(draw){ x.fillStyle = PAL.NAVY; x.fillRect(L, top, 6, y - top - 30*k); }
+      return y;
+    };
+    let k = 1.45;
+    while(layout(k, false) > CH - 150 && k > .7) k -= .03;
+    layout(k, true);
+    return c;
+  }
+  async function saveCard(code, r, btn){
+    const t = data.types[code];
+    btn.disabled = true;
+    try{
+      try{ await Promise.all(['300 40px Prompt','400 40px Prompt','500 40px Prompt'].map(f=>document.fonts.load(f))); }catch(e){}
+      const slug = t.display_name.replace(/\s+/g,'-').toLowerCase();
+      const front = await drawFront(t, code, r), back = drawBack(t);
+      const blobs = await Promise.all([front, back].map(cv=>new Promise(ok=>cv.toBlob(ok, 'image/png'))));
+      const files = [new File([blobs[0]], `cosmic-card-${slug}-front.png`, {type:'image/png'}),
+                     new File([blobs[1]], `cosmic-card-${slug}-back.png`, {type:'image/png'})];
+      // phones: open the share sheet with both images (has "Save Image"); computers: download both files
+      const touch = matchMedia('(pointer:coarse)').matches;
+      if(touch && navigator.canShare && navigator.canShare({files})){
+        try{ await navigator.share({files, title:'My Cosmic Identity'}); return; }
+        catch(e){ if(e && e.name === 'AbortError') return; }
+      }
+      for(const f of files){
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(f); a.download = f.name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+        await new Promise(ok=>setTimeout(ok, 400));
+      }
+      Cosmic.toast('บันทึกการ์ดแล้ว 2 รูป (หน้า + หลัง)');
+    } finally { btn.disabled = false; }
   }
 
   render();

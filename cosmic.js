@@ -5,7 +5,7 @@
 
   // ===== Settings you may need to change =====
   const CONFIG = {
-    // ลิงก์ LINE OA ของครูมิว เช่น 'https://lin.ee/xxxxxxx' — ถ้าเว้นว่าง ปุ่ม LINE จะขึ้นว่า "เร็ว ๆ นี้" และกดไม่ได้
+    // ลิงก์ LINE OA ของโค้ชมิว เช่น 'https://lin.ee/xxxxxxx' — ถ้าเว้นว่าง ปุ่ม LINE จะขึ้นว่า "เร็ว ๆ นี้" และกดไม่ได้
     LINE_URL: '',
     SUPABASE_URL: 'https://xkbhhtauzqgvryeocmiz.supabase.co',
     SUPABASE_KEY: 'sb_publishable_14U9zriQnKcTb7PSA97zMQ_g1DuzDy-',   // publishable key (ปลอดภัยที่จะอยู่ในหน้าเว็บ)
@@ -25,6 +25,8 @@
   // ===== Data =====
   let dataPromise = null;
   function loadData(){
+    // Trial files (opened straight from disk) carry the JSON inside the page, because Chrome blocks fetch() on file://
+    if(!dataPromise && window.__COSMIC_DATA) dataPromise = Promise.resolve(window.__COSMIC_DATA);
     if(!dataPromise){
       dataPromise = fetch(CONFIG.DATA_URL, {cache:'no-cache'}).then(r=>{
         if(!r.ok) throw new Error('โหลดข้อมูลแบบทดสอบไม่สำเร็จ (' + r.status + ')');
@@ -35,7 +37,7 @@
   }
 
   // ===== Scoring (rules from JSON → scoring) =====
-  // answers: array of 12 options ('A'–'D'), in question order
+  // answers: one option ('A'–'D') per question, in question order (16 in the current JSON)
   function score(data, answers){
     const codes = Object.keys(data.types);                  // G, D, T, V
     const scores = Object.fromEntries(codes.map(c=>[c,0]));
@@ -80,7 +82,7 @@
 
   // ===== Supabase (anonymous, insert-only; failures never block the visitor) =====
   function post(table, row){
-    if(!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_KEY) return Promise.resolve();
+    if(!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_KEY || window.__COSMIC_TRIAL) return Promise.resolve();   // trial files never send data
     const headers = {apikey:CONFIG.SUPABASE_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'};
     if(CONFIG.SUPABASE_KEY.startsWith('eyJ')) headers.Authorization = 'Bearer ' + CONFIG.SUPABASE_KEY;
     return fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${table}`, {method:'POST', keepalive:true, headers, body:JSON.stringify(row)})
@@ -115,6 +117,58 @@
     document.body.appendChild(t); setTimeout(()=>t.remove(), 2200);
   }
 
+  // Scroll reveal: items rise in when they reach the screen (skipped entirely for reduced motion)
+  const REVEAL = '.sec-head, .card, .faq details, .final > *, .hero-copy > *, .photo-slot, .tags, .story-cols p, .story-close, .r-card, .split > .r-card';
+  function reveal(root = document){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = [...root.querySelectorAll(REVEAL)].filter(el=>!el.classList.contains('reveal') && !el.closest('.no-reveal'));
+    if(!els.length) return;
+    els.forEach(el=>{
+      const sibs = [...el.parentElement.children].filter(c=>c.matches(REVEAL));
+      el.style.setProperty('--d', Math.min(sibs.indexOf(el), 5) * 0.09 + 's');   // small stagger inside a row
+      el.classList.add('reveal');
+    });
+    if(!('IntersectionObserver' in window)){ els.forEach(el=>el.classList.add('in')); return; }
+    // plays again each time the item scrolls back into view
+    const io = new IntersectionObserver(entries=>entries.forEach(e=>{
+      e.target.classList.toggle('in', e.isIntersecting);
+    }), {threshold:.12, rootMargin:'0px 0px -6% 0px'});
+    els.forEach(el=>io.observe(el));
+  }
+  // Meteor shower on navy areas + sparkles on light areas (decoration only; skipped for reduced motion)
+  function sky(){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const r = (a, b) => a + Math.random() * (b - a);
+    const layer = (host, cls, n, make) => {
+      if(host.querySelector(':scope > .' + cls)) return;
+      const d = document.createElement('div');
+      d.className = cls; d.setAttribute('aria-hidden', 'true');
+      for(let k = 0; k < n; k++){ const i = document.createElement('i'); i.style.cssText = make(k, n); d.appendChild(i); }
+      host.prepend(d);
+    };
+    document.querySelectorAll('section.s-navy, .quiz-page').forEach(el=>{
+      el.classList.add('stars');
+      const n = el.matches('.hero, .quiz-page') ? 9 : 6;
+      layer(el, 'meteors', n, (k, n)=>{
+        const cycle = r(2.6, 5.2);
+        return `--x:${r(25, 115).toFixed(1)}%;--y:${r(-10, 55).toFixed(1)}%;--len:${r(90, 190)|0}px;` +
+               `--dist:${r(450, 900)|0}px;--cycle:${cycle.toFixed(2)}s;--delay:${(-cycle * k / n + r(0, .6)).toFixed(2)}s`;
+      });
+    });
+    document.querySelectorAll('section.s-lgold, section.s-off').forEach(el=>{
+      layer(el, 'sparkles', 10, (k, n)=>{
+        const cycle = r(4, 7);
+        return `--x:${r(2, 96).toFixed(1)}%;--y:${r(4, 92).toFixed(1)}%;--sz:${r(8, 16)|0}px;` +
+               `--cycle:${cycle.toFixed(2)}s;--delay:${(-cycle * k / n).toFixed(2)}s`;
+      });
+    });
+  }
+
+  // Fade-up for a freshly drawn quiz screen
+  function screenIn(el){
+    el.classList.remove('screen-in'); void el.offsetWidth; el.classList.add('screen-in');
+  }
+
   // Mobile menu (both pages)
   document.addEventListener('DOMContentLoaded', ()=>{
     const burger = document.getElementById('burger'), menu = document.getElementById('menu');
@@ -122,9 +176,10 @@
       burger.addEventListener('click', ()=>{ const o = menu.classList.toggle('open'); burger.setAttribute('aria-expanded', o); });
       menu.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>{ menu.classList.remove('open'); burger.setAttribute('aria-expanded','false'); }));
     }
+    sky();
     document.querySelectorAll('[data-icon]').forEach(el=>{ el.innerHTML = ICONS[el.dataset.icon] || ''; });
     document.querySelectorAll('[data-line]').forEach(el=>{ el.outerHTML = lineButton(el.dataset.line, el.className.replace('btn','').trim(), el.dataset.track); });
   });
 
-  window.Cosmic = {CONFIG, ICONS, loadData, score, store, sessionId, newSession, track, saveResult, esc, lineButton, toast};
+  window.Cosmic = {CONFIG, ICONS, loadData, score, store, sessionId, newSession, track, saveResult, esc, lineButton, toast, reveal, screenIn};
 })();
