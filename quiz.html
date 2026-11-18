@@ -375,6 +375,7 @@
 
   // ----- Share card 9:16 (1080×1920 PNG, no per-question answers) -----
   function wrapLines(ctx, text, maxW){
+    if('letterSpacing' in ctx) ctx.letterSpacing = '0px';   // measure without spacing left over from a label
     const seg = (window.Intl && Intl.Segmenter) ? [...new Intl.Segmenter('th', {granularity:'word'}).segment(text)].map(s=>s.segment) : [...text];
     const lines = []; let line = '';
     for(const w of seg){
@@ -408,7 +409,7 @@
     x.strokeStyle = GOLD; x.lineWidth = 3; x.beginPath(); x.roundRect ? x.roundRect(56,56,W-112,H-112,40) : x.rect(56,56,W-112,H-112); x.stroke();
 
     x.textAlign = 'center'; x.textBaseline = 'alphabetic';
-    const text = (s, y, font, color, spacing) => { x.font = font; x.fillStyle = color; if('letterSpacing' in x) x.letterSpacing = spacing || '0px'; x.fillText(s, W/2, y); };
+    const text = (s, y, font, color, spacing) => { x.font = font; x.fillStyle = color; x.textAlign = 'left'; if('letterSpacing' in x) x.letterSpacing = spacing || '0px'; x.fillText(s, W/2 - x.measureText(s).width/2, y); };
     text('MY COSMIC IDENTITY', 250, '500 40px Prompt', GOLD, '10px');
     // icon
     x.fillStyle = 'rgba(220,198,164,.10)'; x.beginPath(); x.arc(W/2, 560, 210, 0, Math.PI*2); x.fill();
@@ -465,9 +466,10 @@
     star4(x, CW/2, 150, 18, line);
   }
   function txt(x, s, X, Y, font, color, spacing, align){
-    x.font = font; x.fillStyle = color; x.textAlign = align || 'center';
+    x.font = font; x.fillStyle = color; x.textAlign = 'left';
     if('letterSpacing' in x) x.letterSpacing = spacing || '0px';
-    x.fillText(s, X, Y);
+    const w = (align || 'center') === 'center' ? x.measureText(s).width : 0;
+    x.fillText(s, X - w/2, Y);
   }
   async function drawFront(t, code, r){
     const c = document.createElement('canvas'); c.width = CW; c.height = CH; const x = c.getContext('2d');
@@ -491,16 +493,26 @@
     [[-210,-200,20],[250,-160,13],[-260,170,14],[190,230,20]].forEach(([dx,dy,s])=>star4(x, CW/2+dx, oy+dy, s, PAL.LGOLD));
     try{ const im = await loadSvg(ICONS[code], 300, PAL.GOLD); x.drawImage(im, CW/2-150, oy-150, 300, 300); }catch(e){}
     // words
-    let y = 1000;
-    x.font = '500 56px Prompt';
-    for(const ln of wrapLines(x, t.title, 880)){ txt(x, ln, CW/2, y, '500 56px Prompt', PAL.OFF); y += 76; }
-    y += 6; x.font = '300 40px Prompt';
-    for(const ln of wrapLines(x, t.tag, 820)){ txt(x, ln, CW/2, y, '300 40px Prompt', 'rgba(244,239,232,.88)'); y += 62; }
-    x.font = '500 44px Prompt'; if('letterSpacing' in x) x.letterSpacing = '1px';
-    const pw = x.measureText(t.signature_power).width + 96, py = y + 14;
-    x.fillStyle = PAL.GOLD; rrect(x, CW/2-pw/2, py, pw, 92, 46); x.fill();
-    txt(x, t.signature_power, CW/2, py + 61, '500 44px Prompt', PAL.DEEP, '1px');
-    txt(x, `${r.scores[code]} / ${r.total} คำตอบ`, CW/2, py + 160, '400 38px Prompt', PAL.LGOLD, '1px');
+    const TOP = 975, BOTTOM = CH - 360;           // free space between the orbit and the name-plate line
+    const words = (k, draw) => {
+      let y = TOP;
+      x.font = `500 ${56*k}px Prompt`;
+      for(const ln of wrapLines(x, t.title, 860)){ if(draw) txt(x, ln, CW/2, y, `500 ${56*k}px Prompt`, PAL.OFF); y += 76*k; }
+      y += 6*k; x.font = `300 ${40*k}px Prompt`;
+      for(const ln of wrapLines(x, t.tag, 820)){ if(draw) txt(x, ln, CW/2, y, `300 ${40*k}px Prompt`, 'rgba(244,239,232,.88)'); y += 62*k; }
+      const py = y + 8*k, ph = 92*k;
+      if(draw){
+        x.font = `500 ${44*k}px Prompt`; if('letterSpacing' in x) x.letterSpacing = '1px';
+        const pw = x.measureText(t.signature_power).width + 96*k;
+        x.fillStyle = PAL.GOLD; rrect(x, CW/2-pw/2, py, pw, ph, ph/2); x.fill();
+        txt(x, t.signature_power, CW/2, py + ph*.66, `500 ${44*k}px Prompt`, PAL.DEEP, '1px');
+        txt(x, `${r.scores[code]} / ${r.total} คำตอบ`, CW/2, py + ph + 62*k, `400 ${38*k}px Prompt`, PAL.LGOLD, '1px');
+      }
+      return py + ph + 62*k;
+    };
+    let k = 1;
+    while(words(k, false) > BOTTOM && k > .6) k -= .04;
+    words(k, true);
     // name plate
     x.strokeStyle = PAL.GOLD; x.lineWidth = 2.5; x.beginPath(); x.moveTo(110, CH-330); x.lineTo(CW-110, CH-330); x.stroke();
     let size = 112; x.font = `500 ${size}px Prompt`; if('letterSpacing' in x) x.letterSpacing = '14px';

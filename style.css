@@ -406,6 +406,10 @@ footer{background:var(--brand-deep-navy);color:rgba(244,239,232,.8);padding-bloc
 .flip-card{display:grid;width:min(100%,380px);cursor:pointer;transform-style:preserve-3d;
   transition:transform .8s cubic-bezier(.3,.7,.2,1);animation:cardIn 1s cubic-bezier(.2,.8,.2,1) backwards}
 .flip-card[data-flipped="true"]{transform:rotateY(180deg)}
+.flip-card .front{transform:rotateY(0deg);visibility:visible;transition:visibility 0s .38s}
+.flip-card[data-flipped="true"] .front{visibility:hidden}
+.flip-card .back{visibility:hidden;transition:visibility 0s .38s}
+.flip-card[data-flipped="true"] .back{visibility:visible}
 @keyframes cardIn{from{opacity:0;transform:translateY(30px) rotateY(-35deg) scale(.9)}to{opacity:1;transform:none}}
 .flip-card .face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;
   padding:30px 24px;display:grid;align-content:center;min-height:520px;
@@ -463,7 +467,7 @@ footer{background:var(--brand-deep-navy);color:rgba(244,239,232,.8);padding-bloc
 
 @media print{.reveal{opacity:1!important;transform:none!important}
   .flip-card,.flip-card[data-flipped="true"]{transform:none!important;animation:none!important;display:grid;gap:16px;width:100%}
-  .flip-card .face{grid-area:auto;transform:none!important;backface-visibility:visible;min-height:0;break-inside:avoid}.stars::before,.stars::after,.meteors,.sparkles,.btn-gold::after,.bar i::after{display:none}
+  .flip-card .face{grid-area:auto;transform:none!important;backface-visibility:visible;visibility:visible!important;min-height:0;break-inside:avoid}.stars::before,.stars::after,.meteors,.sparkles,.btn-gold::after,.bar i::after{display:none}
   .hero h1 span{-webkit-text-fill-color:currentColor;background:none}}
 
 /* Coach bio (Home #coach) */
@@ -471,3 +475,33 @@ footer{background:var(--brand-deep-navy);color:rgba(244,239,232,.8);padding-bloc
 .coach-bio .lead{margin:0}
 .coach-bio .bio-close{margin:4px 0 0;font-size:clamp(18px,2.4vw,21px);font-weight:500;color:var(--head);border-left:3px solid var(--brand-gold);padding-left:14px}
 .coach-bio .eyebrow{margin:0}
+
+/* ===== PDF / print of the result: nothing cut in half =====
+   Page 1 = the card (front + back side by side); then each section stays whole, moving to the next page if it does not fit. */
+@page{size:A4;margin:10mm;background:#F4EFE8}
+@media print{
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  /* paper is off-white (light paper prints cleanly and matches the page margins); cards keep their own colours */
+  html{color-scheme:light}
+  html,body,.quiz-page{background:var(--brand-off-white)!important}
+  .quiz-page{color:var(--brand-deep-navy)}
+  .result > .disclaimer{color:rgba(16,26,47,.75);margin:0 auto 1mm;text-align:center;break-after:avoid}   /* keep the slogan on the same page */
+  .result > .slogan-line{color:var(--brand-deep-navy);margin:0 auto}
+  .r-card.c-off,.r-card.c-lgold,.tie-note{border:1px solid rgba(16,26,47,.18)}
+  .quiz-page{padding:0!important;min-height:0}
+  .quiz-page > .wrap{max-width:none;padding-inline:0}
+  .result{display:block;max-width:none}
+  .result > *{margin:0 0 4mm}
+  .tie-note{break-inside:avoid}
+  .flip-wrap{display:block;padding:0;perspective:none;break-inside:avoid}
+  .flip-card,.flip-card[data-flipped="true"]{display:flex!important;align-items:stretch;gap:5mm;width:100%!important}
+  .flip-card .face{flex:1 1 0;min-width:0;min-height:0;padding:22px 20px;box-shadow:none;break-inside:avoid}
+  .flip-card .t-orbit{width:170px;height:170px}
+  .flip-card .t-orbit .ico-lg{width:100px;height:100px}
+  .flip-card .t-name h1{font-size:28px;letter-spacing:.08em}
+  .split{display:block}
+  .split > .r-card{margin-bottom:5mm}
+  .r-card,.score,.r-card li,.r-card p,.r-card ul,.disclaimer,.slogan-line{break-inside:avoid}
+  .r-card h2,.r-card h3{break-after:avoid}
+  .r-card details summary{display:none}
+}
