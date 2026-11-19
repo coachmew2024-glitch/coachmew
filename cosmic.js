@@ -10,6 +10,10 @@
     SUPABASE_URL: 'https://xkbhhtauzqgvryeocmiz.supabase.co',
     SUPABASE_KEY: 'sb_publishable_14U9zriQnKcTb7PSA97zMQ_g1DuzDy-',   // publishable key (ปลอดภัยที่จะอยู่ในหน้าเว็บ)
     DATA_URL: 'data/cosmic-identity.json',
+    // ช่องทางเข้าสู่ระบบที่แสดงบนหน้า login.html — ตั้งค่าใน Supabase เสร็จช่องทางไหน ค่อยเพิ่มชื่อเข้าไป
+    // ใช้ได้: 'google', 'email', 'facebook', 'line'   (ตัวอย่างเปิดครบ: ['google','facebook','line','email'])
+    AUTH_PROVIDERS: ['google', 'email'],
+    LINE_PROVIDER_ID: 'custom:line',   // ชื่อ provider ของ LINE ที่ตั้งไว้ใน Supabase (ต้องขึ้นต้นด้วย custom:)
   };
 
   // ===== Star icons (placeholder until the final characters arrive — swap the SVG here) =====
@@ -94,15 +98,17 @@
     if(once){ if(sent.has(key)) return; sent.add(key); }
     post('cosmic_events', Object.assign({session_id:sessionId(), event, question_no:null, option:null}, extra, utm()));
   }
-  function saveResult(answers, r){
-    post('cosmic_results', Object.assign({
+  // toAccount → saved to the signed-in member's account (returns the new result id). Otherwise the anonymous insert.
+  function saveResult(answers, r, toAccount){
+    const row = Object.assign({
       session_id: sessionId(),
       answers: answers.join(''),
       score_g: r.scores.G, score_d: r.scores.D, score_t: r.scores.T, score_v: r.scores.V,
       leading_types: r.leading.join(''),
-    }, utm()));
+    }, utm());
+    if(toAccount && window.CosmicAuth && CosmicAuth.api) return CosmicAuth.api.saveResult(row);
+    return post('cosmic_results', row);
   }
-
   // ===== Small helpers =====
   const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   function lineButton(label, cls, event){

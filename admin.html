@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>หลังบ้าน · Coach Mew Mastermind</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="Coach Mew Mastermind หน้าแรก">
+      <span class="logo-mark" data-icon="logo"></span>
+      <span class="logo-txt"><b>Coach Mew</b><small>MASTERMIND</small></span>
+    </a>
+    <ul class="menu" id="menu">
+      <li><a href="index.html">หน้าแรก</a></li>
+      <li><a href="quiz.html">ค้นหาดาวของคุณ</a></li>
+      <li><a href="account.html">ดาวของฉัน</a></li>
+      <li><a href="admin.html" aria-current="page">หลังบ้าน</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
+  </div>
+</header>
+
+<main class="page s-navy stars">
+  <div class="wrap" id="app" aria-live="polite">
+    <div class="panel center-panel c-deep"><p>กำลังโหลด...</p></div>
+  </div>
+</main>
+
+<dialog class="sheet c-lgold" id="sheet" aria-labelledby="sheetTitle"><div class="sheet-in" id="sheetIn"></div></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
+<script src="cosmic.js"></script>
+<script src="auth.js"></script>
+<script>
+(async function(){
+  const {esc} = Cosmic, A = CosmicAuth, api = A.api;
+  const app = document.getElementById('app'), sheet = document.getElementById('sheet'), sheetIn = document.getElementById('sheetIn');
+  const s = await A.requireMember('admin.html');
+  // the database answers "nothing" to non-admins anyway (RLS); this message is only so the page makes sense
+  if(!s.admin){
+    app.innerHTML = `<div class="panel center-panel c-deep"><h1 style="font-size:26px">หน้านี้สำหรับทีมงานเท่านั้น</h1>
+      <p class="lead">บัญชีนี้ไม่มีสิทธิ์เข้าหลังบ้าน</p><a class="btn btn-gold" href="account.html">ไปที่ดาวของฉัน</a></div>`;
+    return;
+  }
+  let data;
+  try{ data = await Cosmic.loadData(); }catch(e){ data = {types:{}}; }
+  const CODES = ['G', 'D', 'T', 'V'];
+  const tName = c => data.types[c] ? data.types[c].display_name : c;
+  let members = [], bookings = [], results = [], tab = 'overview', query = '', bFilter = '';
+
+  async function load(){
+    [members, bookings, results] = await Promise.all([api.admin.members(), api.admin.bookings(), api.admin.results()]);
+  }
+  try{ await load(); }
+  catch(e){ console.error(e); app.innerHTML = `<p class="err" role="alert">${esc(A.thaiError(e))}</p>`; return; }
+
+  // ----- CSV (opens in Excel / Google Sheets; Thai kept by the BOM) -----
+  function csv(rows, name){
+    const cell = v => { let t = v == null ? '' : String(v); if(/^[=+\-@]/.test(t)) t = "'" + t;   // stop formulas running in Excel
+      return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+    const text = '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], {type:'text/csv;charset=utf-8'}));
+    a.download = name + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  const PROV = {email:'อีเมล', google:'Google', facebook:'Facebook'};
+  const provName = p => PROV[p] || (String(p || '').startsWith('custom:') || p === 'line' ? 'LINE' : (p || '–'));
+  function csvMembers(){
+    csv([['ชื่อ', 'อีเมล', 'วันสมัคร', 'ช่องทางเข้าสู่ระบบ', 'ไทป์ล่าสุด', 'ทำแบบประเมิน (ครั้ง)', 'รับข่าวสาร', 'เวลาที่เลือกรับข่าวสารล่าสุด', 'เวลาที่ยอมรับนโยบาย']]
+      .concat(members.map(m => [m.display_name, m.email, A.fmtDate(m.created_at), provName(m.provider), A.typeNames(data, m.latest_types),
+        m.results_count, m.marketing_consent ? 'รับ' : 'ไม่รับ', A.fmtDate(m.marketing_consent_at), A.fmtDate(m.accepted_terms_at)])), 'members');
+  }
+  function csvMarketing(){
+    const list = members.filter(m => m.marketing_consent);
+    if(!list.length) return Cosmic.toast('ยังไม่มีคนที่ยินยอมรับข่าวสาร');
+    csv([['ชื่อ', 'อีเมล', 'ยินยอมรับข่าวสารเมื่อ', 'ไทป์ล่าสุด']]
+      .concat(list.map(m => [m.display_name, m.email, A.fmtDate(m.marketing_consent_at), A.typeNames(data, m.latest_types)])), 'marketing-consent');
+  }
+
+  // ----- 1. Overview -----
+  // a visitor who finished signed out and then logged in has 2 rows from the same visit (session) → count once
+  function uniqueResults(){
+    const seen = new Map();
+    results.forEach(r => { const k = r.session_id || 'id' + r.id, o = seen.get(k); if(!o || (!o.user_id && r.user_id)) seen.set(k, r); });
+    return [...seen.values()];
+  }
+  function overview(){
+    const results = uniqueResults();
+    const takers = new Set(results.filter(r => r.user_id).map(r => r.user_id)).size;
+    const byType = {}; results.forEach(r => { const k = r.leading_types.length > 1 ? 'tie' : r.leading_types; byType[k] = (byType[k] || 0) + 1; });
+    const total = results.length || 1;
+    const day = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+    const today = day(new Date());
+    const days = [...Array(14)].map((_, i) => { const d = new Date(today); d.setDate(d.getDate() - (13 - i)); return d; });
+    const perDay = days.map(d => results.filter(r => day(r.created_at).getTime() === d.getTime()).length);
+    const weekStart = d => { const x = day(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };   // Monday
+    const weeks = [...Array(8)].map((_, i) => { const w = weekStart(today); w.setDate(w.getDate() - 7 * (7 - i)); return w; });
+    const perWeek = weeks.map(w => results.filter(r => weekStart(r.created_at).getTime() === w.getTime()).length);
+    const newMembers = members.filter(m => new Date(m.created_at) >= weeks[7]).length;
+    const bar = (label, n, max, note) => `<div class="hbar"><span>${esc(label)}</span><div class="bar"><i style="width:${max ? n / max * 100 : 0}%"></i></div><em>${note || n}</em></div>`;
+    const dShort = d => d.toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+    const maxD = Math.max(...perDay), maxW = Math.max(...perWeek);
+    return `
+      <div class="stats">
+        <div class="stat c-deep"><b>${members.length}</b><span>สมาชิกทั้งหมด</span></div>
+        <div class="stat c-deep"><b>${takers}</b><span>สมาชิกที่ทำแบบประเมินแล้ว</span></div>
+        <div class="stat c-deep"><b>${results.length}</b><span>คนทำแบบประเมินจนเห็นผล (รวมคนที่ไม่ได้ล็อกอิน)</span></div>
+        <div class="stat c-deep"><b>${members.filter(m => m.marketing_consent).length}</b><span>ยินยอมรับข่าวสาร</span></div>
+      </div>
+      <p class="count-note">สมาชิกใหม่สัปดาห์นี้ ${newMembers} คน · การจองที่รอยืนยัน ${bookings.filter(b => b.status === 'pending').length} รายการ</p>
+      <section class="r-card c-lgold"><h2>สัดส่วน 4 ไทป์ (ไทป์หลักของแต่ละผล)</h2>
+        <div class="hbars">${CODES.map(c => bar(tName(c), byType[c] || 0, total, `${byType[c] || 0} · ${((byType[c] || 0) / total * 100).toFixed(1)}%`)).join('')}
+          ${byType.tie ? bar('เสมอหลายไทป์', byType.tie, total, `${byType.tie} · ${(byType.tie / total * 100).toFixed(1)}%`) : ''}</div></section>
+      <div class="split">
+        <section class="r-card c-navy"><h2>ผลต่อวัน (14 วันล่าสุด)</h2><div class="hbars">${days.map((d, i) => bar(dShort(d), perDay[i], maxD)).join('')}</div></section>
+        <section class="r-card c-navy"><h2>ผลต่อสัปดาห์ (8 สัปดาห์)</h2><div class="hbars">${weeks.map((w, i) => bar('สัปดาห์ ' + dShort(w), perWeek[i], maxW)).join('')}</div></section>
+      </div>`;
+  }
+
+  // ----- 2. Members -----
+  function memberList(){
+    const ql = query.trim().toLowerCase();
+    const list = members.filter(m => !ql || (m.display_name || '').toLowerCase().includes(ql) || (m.email || '').toLowerCase().includes(ql));
+    return `
+      <div class="toolbar">
+        <input class="search" id="q" type="search" placeholder="ค้นหาชื่อหรืออีเมล" aria-label="ค้นหาสมาชิก" value="${esc(query)}">
+        <button type="button" class="btn btn-line btn-sm" id="csvAll">ดาวน์โหลด CSV รายชื่อทั้งหมด</button>
+        <button type="button" class="btn btn-gold btn-sm" id="csvMk">CSV เฉพาะคนที่ยินยอมรับข่าวสาร</button>
+      </div>
+      <p class="count-note">แสดง ${list.length} จาก ${members.length} คน · กดที่รายชื่อเพื่อดูผลทุกครั้งและการจอง</p>
+      <ul class="items">${list.map(m => `
+        <li><button type="button" class="item c-deep member-row" data-member="${esc(m.id)}">
+          <span class="item-top"><b>${esc(m.display_name || '(ไม่มีชื่อ)')}</b><span>สมัคร ${esc(A.fmtDate(m.created_at, false))}</span></span>
+          <span class="meta">${esc(m.email || '')} · ${esc(provName(m.provider))}</span>
+          <span class="meta">ไทป์ล่าสุด: ${esc(A.typeNames(data, m.latest_types))} · ทำ ${m.results_count} ครั้ง · ข่าวสาร: ${m.marketing_consent ? 'รับ' : 'ไม่รับ'}${m.accepted_terms_at ? '' : ' · ยังไม่ยอมรับนโยบาย'}</span>
+        </button></li>`).join('') || '<li class="count-note">ไม่พบรายชื่อ</li>'}</ul>`;
+  }
+
+  // ----- 3. Bookings -----
+  const bookingItem = b => `
+    <li class="item c-deep">
+      <div class="item-top"><b>${esc(b.member_name || b.member_email || 'สมาชิก')}</b><span class="badge s-${esc(b.status)}">${esc(A.STATUS[b.status] || b.status)}</span></div>
+      <p class="meta">${esc(b.package)} · ${b.starts_at ? esc(A.fmtDate(b.starts_at)) : 'ยังไม่นัดวันเวลา'}</p>
+      ${b.note ? `<p class="meta">ลูกค้าเห็น: ${esc(b.note)}</p>` : ''}
+      ${b.admin_note ? `<p class="meta">โน้ตทีม (ลูกค้าไม่เห็น): ${esc(b.admin_note)}</p>` : ''}
+      <div class="item-actions">
+        <label class="sr-only" for="st${b.id}">สถานะ</label>
+        <select class="search btn-sm" style="width:auto;min-height:40px" id="st${b.id}" data-status="${b.id}">
+          ${Object.entries(A.STATUS).map(([k, v]) => `<option value="${k}" ${k === b.status ? 'selected' : ''}>${v}</option>`).join('')}</select>
+        <button type="button" class="btn btn-line btn-sm" data-edit="${b.id}">แก้ไข</button>
+      </div>
+    </li>`;
+  function bookingList(){
+    const list = bookings.filter(b => !bFilter || b.status === bFilter);
+    return `
+      <div class="toolbar">
+        <button type="button" class="btn btn-gold btn-sm" id="addB">+ เพิ่มการจอง</button>
+        <select id="bf" aria-label="กรองตามสถานะ"><option value="">ทุกสถานะ</option>
+          ${Object.entries(A.STATUS).map(([k, v]) => `<option value="${k}" ${k === bFilter ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      </div>
+      <p class="count-note">ลูกค้าจองผ่าน LINE แล้วทีมกรอกที่นี่ · ลูกค้าเห็นรายการของตัวเองในหน้า "ดาวของฉัน" (ไม่เห็นโน้ตทีม)</p>
+      <ul class="items">${list.map(bookingItem).join('') || '<li class="count-note">ยังไม่มีการจอง</li>'}</ul>`;
+  }
+
+  function render(){
+    app.innerHTML = `
+      <div class="admin-wrap">
+        <div class="page-head" style="margin:0"><span class="eyebrow">Admin</span><h1>หลังบ้าน Coach Mew</h1></div>
+        <div class="seg" role="tablist">
+          ${[['overview', 'ภาพรวม'], ['members', 'สมาชิก (' + members.length + ')'], ['bookings', 'การจอง Coaching (' + bookings.length + ')']]
+            .map(([k, v]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}">${v}</button>`).join('')}
+        </div>
+        <div id="pane">${tab === 'overview' ? overview() : tab === 'members' ? memberList() : bookingList()}</div>
+      </div>`;
+    app.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); });
+    const qi = document.getElementById('q');
+    if(qi){ qi.oninput = () => { query = qi.value; const pos = qi.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(pos, pos); }; }
+    const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+    on('csvAll', csvMembers); on('csvMk', csvMarketing); on('addB', () => bookingForm(null));
+    const bf = document.getElementById('bf'); if(bf) bf.onchange = () => { bFilter = bf.value; render(); };
+    app.querySelectorAll('[data-member]').forEach(b => b.onclick = () => memberSheet(b.dataset.member));
+    wireBookingActions(app);
+  }
+  function wireBookingActions(root){
+    root.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => bookingForm(bookings.find(x => String(x.id) === b.dataset.edit)));
+    root.querySelectorAll('[data-status]').forEach(sel => sel.onchange = async () => {
+      sel.disabled = true;
+      try{ await api.admin.updateBooking(Number(sel.dataset.status), {status:sel.value}); await reload(); Cosmic.toast('เปลี่ยนสถานะแล้ว'); }
+      catch(e){ sel.disabled = false; Cosmic.toast(A.thaiError(e)); }
+    });
+  }
+  async function reload(){ await load(); render(); if(sheet.open && sheet.dataset.member) memberSheet(sheet.dataset.member); }
+
+  // ----- Member detail -----
+  async function memberSheet(id){
+    const m = members.find(x => x.id === id); if(!m) return;
+    const rs = results.filter(r => r.user_id === id), bs = bookings.filter(b => b.user_id === id);
+    sheet.dataset.member = id;
+    sheetIn.innerHTML = `
+      <div class="sheet-head"><div><h2 id="sheetTitle">${esc(m.display_name || '(ไม่มีชื่อ)')}</h2><p class="small">${esc(m.email || '')}</p></div>
+        <button type="button" class="x" data-close aria-label="ปิด">×</button></div>
+      <p class="small">สมัคร ${esc(A.fmtDate(m.created_at))} · ${esc(provName(m.provider))} · ยอมรับนโยบาย ${esc(A.fmtDate(m.accepted_terms_at))}<br>
+        รับข่าวสาร: ${m.marketing_consent ? 'รับ' : 'ไม่รับ'} (เลือกล่าสุด ${esc(A.fmtDate(m.marketing_consent_at))})</p>
+      <h3>ผลแบบประเมิน (${rs.length})</h3>
+      <ul class="items">${rs.map(r => `<li class="item">
+        <div class="item-top"><b>${esc(A.typeNames(data, r.leading_types))}</b><span>${esc(A.fmtDate(r.created_at))}</span></div>
+        <ul class="mini-scores">${CODES.map(c => `<li class="${r.leading_types.includes(c) ? 'top' : ''}">${esc(tName(c))} ${r['score_' + c.toLowerCase()]}</li>`).join('')}</ul>
+        <div class="item-actions"><a class="btn btn-dark btn-sm" href="quiz.html?result=${encodeURIComponent(r.id)}" target="_blank" rel="noopener">เปิดดูผลเต็ม</a></div>
+      </li>`).join('') || '<li class="small">ยังไม่ได้ทำแบบประเมิน</li>'}</ul>
+      <h3>การจอง (${bs.length})</h3>
+      <ul class="items">${bs.map(b => `<li class="item">
+        <div class="item-top"><b>${esc(b.package)}</b><span class="badge s-${esc(b.status)}">${esc(A.STATUS[b.status])}</span></div>
+        <p class="meta">${b.starts_at ? esc(A.fmtDate(b.starts_at)) : 'ยังไม่นัดวันเวลา'}</p>
+        <div class="item-actions"><button type="button" class="btn btn-line btn-sm" data-edit="${b.id}">แก้ไข</button></div></li>`).join('') || '<li class="small">ยังไม่มีการจอง</li>'}</ul>
+      <button type="button" class="btn btn-dark" id="addForMember">+ เพิ่มการจองให้คนนี้</button>`;
+    sheetIn.querySelector('[data-close]').onclick = () => sheet.close();
+    sheetIn.querySelector('#addForMember').onclick = () => bookingForm(null, id);
+    wireBookingActions(sheetIn);
+    if(!sheet.open) sheet.showModal();
+  }
+
+  // ----- Add / edit booking -----
+  const toLocal = iso => { if(!iso) return ''; const d = new Date(iso); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+  function bookingForm(b, forMember){
+    delete sheet.dataset.member;
+    const uid = b ? b.user_id : (forMember || '');
+    sheetIn.innerHTML = `
+      <div class="sheet-head"><h2 id="sheetTitle">${b ? 'แก้ไขการจอง' : 'เพิ่มการจอง'}</h2><button type="button" class="x" data-close aria-label="ปิด">×</button></div>
+      <div id="fErr"></div>
+      <form class="form" id="bForm" novalidate>
+        <div class="field"><label for="bu">สมาชิก</label>
+          <select id="bu" ${b ? 'disabled' : ''} required><option value="">— เลือกสมาชิก —</option>
+            ${members.map(m => `<option value="${esc(m.id)}" ${m.id === uid ? 'selected' : ''}>${esc((m.display_name || '(ไม่มีชื่อ)') + ' · ' + (m.email || ''))}</option>`).join('')}</select>
+          <span class="hint">ลูกค้าต้องสมัครสมาชิกบนเว็บก่อน จึงจะเลือกได้</span></div>
+        <div class="field"><label for="bp">แพ็กเกจ</label><input id="bp" type="text" maxlength="120" required value="${esc(b ? b.package : '')}"></div>
+        <div class="two">
+          <div class="field"><label for="bt">วันเวลานัด</label><input id="bt" type="datetime-local" value="${esc(toLocal(b && b.starts_at))}"><span class="hint">เว้นว่างได้ถ้ายังไม่นัด</span></div>
+          <div class="field"><label for="bs">สถานะ</label><select id="bs">${Object.entries(A.STATUS).map(([k, v]) => `<option value="${k}" ${(b ? b.status : 'pending') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+        </div>
+        <div class="field"><label for="bn">หมายเหตุถึงลูกค้า (ลูกค้าเห็น)</label><textarea id="bn" maxlength="1000">${esc(b ? b.note || '' : '')}</textarea></div>
+        <div class="field"><label for="ba">โน้ตทีม (ลูกค้าไม่เห็น)</label><textarea id="ba" maxlength="2000">${esc(b ? b.admin_note || '' : '')}</textarea></div>
+        <button type="submit" class="btn btn-dark btn-block" id="bSave">บันทึก</button>
+      </form>`;
+    sheetIn.querySelector('[data-close]').onclick = () => sheet.close();
+    sheetIn.querySelector('#bForm').onsubmit = async e => {
+      e.preventDefault();
+      const v = id => sheetIn.querySelector('#' + id).value.trim(), err = sheetIn.querySelector('#fErr'), btn = sheetIn.querySelector('#bSave');
+      const row = {package:v('bp'), starts_at:v('bt') ? new Date(v('bt')).toISOString() : null, status:v('bs'), note:v('bn') || null, admin_note:v('ba') || null};
+      if(!b && !v('bu')) return err.innerHTML = '<p class="err">กรุณาเลือกสมาชิก</p>';
+      if(!row.package) return err.innerHTML = '<p class="err">กรุณากรอกแพ็กเกจ</p>';
+      btn.disabled = true;
+      try{
+        if(b) await api.admin.updateBooking(b.id, row); else await api.admin.addBooking(Object.assign({user_id:v('bu')}, row));
+        sheet.close(); tab = 'bookings'; await reload(); Cosmic.toast('บันทึกการจองแล้ว');
+      }catch(ex){ btn.disabled = false; err.innerHTML = `<p class="err">${esc(A.thaiError(ex))}</p>`; }
+    };
+    if(!sheet.open) sheet.showModal();
+  }
+  sheet.addEventListener('click', e => { if(e.target === sheet) sheet.close(); });
+
+  render();
+})();
+</script>
+</body>
+</html>

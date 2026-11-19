@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เข้าสู่ระบบ · Coach Mew Mastermind</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="Coach Mew Mastermind หน้าแรก">
+      <span class="logo-mark" data-icon="logo"></span>
+      <span class="logo-txt"><b>Coach Mew</b><small>MASTERMIND</small></span>
+    </a>
+    <ul class="menu" id="menu">
+      <li><a href="index.html">หน้าแรก</a></li>
+      <li><a href="index.html#coach">รู้จักโค้ชมิว</a></li>
+      <li><a href="quiz.html">ค้นหาดาวของคุณ</a></li>
+      <li><a href="index.html#coaching">Coaching</a></li>
+      <li><a href="index.html#course">คอร์สออนไลน์</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
+  </div>
+</header>
+
+<main class="page s-navy stars">
+  <div class="wrap">
+    <div class="panel c-deep auth" id="box" aria-live="polite">
+      <p class="lead">กำลังโหลด...</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="slogan">เพื่อนร่วมทางในการสร้างตัวตน</span>
+    <ul>
+      <li><a href="privacy.html">Privacy Policy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+    </ul>
+    <span>© 2026 Coach Mew Mastermind</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
+<script src="cosmic.js"></script>
+<script src="auth.js"></script>
+<script>
+(async function(){
+  const {esc, CONFIG} = Cosmic, A = CosmicAuth, api = A.api;
+  const box = document.getElementById('box');
+  const q = new URLSearchParams(location.search), hash = new URLSearchParams(location.hash.slice(1));
+  const next = A.safeNext(q.get('next')) || 'account.html';
+  const PROVIDERS = (CONFIG.AUTH_PROVIDERS || []).map(p => String(p).toLowerCase());
+  const PURPOSE = 'เข้าสู่ระบบเพื่อบันทึกผลดาวของคุณไว้ดูย้อนหลัง';
+  // why they were sent here (card / PDF / course need an account)
+  const AFTER = (next.match(/[?&]after=(\w+)/) || [])[1] || (next.endsWith('#course') ? 'course' : '');
+  const WHY = {card:'บันทึกการ์ดดาวของคุณ', pdf:'ดาวน์โหลดผลเป็น PDF', course:'ดูคอร์สสร้าง Personal Brand'}[AFTER];
+  const whyLine = WHY ? `<p class="notice" style="text-align:center">เข้าสู่ระบบก่อน (ฟรี) เพื่อ${WHY} แล้วระบบจะพากลับไปที่เดิม</p>` : '';
+  let recovery = q.get('mode') === 'reset';
+  if(api && api.sb) api.sb.auth.onAuthStateChange(ev => { if(ev === 'PASSWORD_RECOVERY'){ recovery = true; showReset(); } });
+
+  const CONSENT = (idT, idM) => `
+    <label class="check"><input type="checkbox" id="${idT}" required>
+      <span>ฉันได้อ่านและยอมรับ <a href="privacy.html" target="_blank" rel="noopener">นโยบายความเป็นส่วนตัว (Privacy Policy)</a>
+      และ <a href="terms.html" target="_blank" rel="noopener">ข้อตกลงการใช้งาน (Terms)</a> <span class="req">(จำเป็น)</span></span></label>
+    <label class="check"><input type="checkbox" id="${idM}">
+      <span>ฉันยินดีรับข่าวสาร คอนเทนต์ และโปรโมชันจาก Coach Mew Mastermind (เลือกหรือไม่ก็ได้ ยกเลิกได้ทุกเมื่อในหน้า "ดาวของฉัน")</span></label>`;
+  const errBox = msg => `<p class="err" role="alert">${esc(msg)}</p>`;
+  const setErr = (el, msg) => { el.innerHTML = msg ? errBox(msg) : ''; };
+  const busy = (btn, on, label) => { btn.disabled = on; if(label) btn.textContent = on ? 'กำลังดำเนินการ...' : label; };
+  const focusFirst = () => { const h = box.querySelector('h1'); if(h){ h.setAttribute('tabindex', '-1'); h.focus({preventScroll:true}); } window.scrollTo(0, 0); };
+  const valid = email => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+
+  // ----- 1. Sign in (provider buttons + email + password) -----
+  function showLogin(msg){
+    const prov = [
+      ['google', 'G', 'เข้าสู่ระบบด้วย Google', 'google'],
+      ['facebook', 'f', 'เข้าสู่ระบบด้วย Facebook', 'facebook'],
+      ['line', 'L', 'เข้าสู่ระบบด้วย LINE', CONFIG.LINE_PROVIDER_ID || 'custom:line'],
+    ].filter(p => PROVIDERS.includes(p[0]));
+    const email = PROVIDERS.includes('email');
+    box.innerHTML = `
+      <span class="ico ico-lg" style="justify-self:center" data-icon="logo"></span>
+      <h1>เข้าสู่ระบบ</h1>
+      <p class="lead">${PURPOSE}</p>
+      ${whyLine}
+      <div id="err">${msg ? errBox(msg) : ''}</div>
+      ${prov.length ? `<div class="providers">${prov.map(p => `
+        <button type="button" class="btn btn-line prov" data-provider="${esc(p[3])}"><span class="pm" aria-hidden="true">${p[1]}</span>${p[2]}</button>`).join('')}</div>
+        <p class="small" style="text-align:center">เข้าสู่ระบบครั้งแรก จะมีขั้นตอนให้อ่านและยอมรับนโยบายความเป็นส่วนตัวก่อนเริ่มใช้งาน</p>` : ''}
+      ${prov.length && email ? '<div class="divider">หรือใช้อีเมล</div>' : ''}
+      ${email ? `
+        <form class="form" id="loginForm" novalidate>
+          <div class="field"><label for="le">อีเมล</label><input id="le" type="email" autocomplete="email" inputmode="email" required></div>
+          <div class="field"><label for="lp">รหัสผ่าน</label><input id="lp" type="password" autocomplete="current-password" required></div>
+          <button type="submit" class="btn btn-gold btn-block" id="loginBtn">เข้าสู่ระบบ</button>
+        </form>
+        <div class="row-links">
+          <button type="button" class="link-btn" id="toForgot">ลืมรหัสผ่าน?</button>
+          <button type="button" class="link-btn" id="toSignup">ยังไม่มีบัญชี? สมัครสมาชิก</button>
+        </div>` : ''}
+      ${!prov.length && !email ? '<p class="err">ยังไม่ได้เปิดช่องทางเข้าสู่ระบบ (ตั้งค่า AUTH_PROVIDERS ใน cosmic.js)</p>' : ''}`;
+    paintIcons(); focusFirst();
+    const err = box.querySelector('#err');
+    box.querySelectorAll('[data-provider]').forEach(b => b.onclick = async () => {
+      setErr(err, ''); b.disabled = true;
+      try{ await api.oauth(b.dataset.provider, next); }       // leaves the page on success
+      catch(e){ b.disabled = false; setErr(err, A.thaiError(e)); }
+    });
+    if(A.TRIAL && window.CosmicMock) window.CosmicMock.loginButtons(box, api, afterSignIn);
+    if(!email) return;
+    box.querySelector('#toForgot').onclick = () => showForgot(box.querySelector('#le').value);
+    box.querySelector('#toSignup').onclick = () => showSignup(box.querySelector('#le').value);
+    box.querySelector('#loginForm').onsubmit = async e => {
+      e.preventDefault();
+      const em = box.querySelector('#le').value.trim(), pw = box.querySelector('#lp').value, btn = box.querySelector('#loginBtn');
+      if(!valid(em)) return setErr(err, 'กรุณากรอกอีเมลให้ถูกต้อง');
+      if(!pw) return setErr(err, 'กรุณากรอกรหัสผ่าน');
+      setErr(err, ''); busy(btn, true, 'เข้าสู่ระบบ');
+      try{ await api.signIn(em, pw); await afterSignIn(); }
+      catch(ex){
+        busy(btn, false, 'เข้าสู่ระบบ'); setErr(err, A.thaiError(ex));
+        if((ex.code || '') === 'email_not_confirmed'){
+          err.insertAdjacentHTML('beforeend', '<button type="button" class="link-btn" id="resend">ส่งอีเมลยืนยันอีกครั้ง</button>');
+          err.querySelector('#resend').onclick = async () => {
+            try{ await api.resend(em, next); setErr(err, 'ส่งอีเมลยืนยันอีกครั้งแล้ว กรุณาเช็กกล่องจดหมาย (และโฟลเดอร์สแปม)'); }
+            catch(x){ setErr(err, A.thaiError(x)); }
+          };
+        }
+      }
+    };
+  }
+
+  // ----- 2. Sign up with email -----
+  function showSignup(prefill){
+    box.innerHTML = `
+      <h1>สมัครสมาชิก</h1>
+      <p class="lead">${PURPOSE}</p>
+      <div id="err"></div>
+      <form class="form" id="suForm" novalidate>
+        <div class="field"><label for="sn">ชื่อที่ให้เรียก</label><input id="sn" type="text" autocomplete="nickname" maxlength="60" required></div>
+        <div class="field"><label for="se">อีเมล</label><input id="se" type="email" autocomplete="email" inputmode="email" required value="${esc(prefill || '')}"></div>
+        <div class="field"><label for="sp">ตั้งรหัสผ่าน</label><input id="sp" type="password" autocomplete="new-password" minlength="8" required>
+          <span class="hint">อย่างน้อย 8 ตัวอักษร ผสมตัวอักษรกับตัวเลข</span></div>
+        ${CONSENT('st', 'sm')}
+        <button type="submit" class="btn btn-gold btn-block" id="suBtn">สมัครสมาชิก</button>
+      </form>
+      <button type="button" class="link-btn" id="toLogin" style="justify-self:center">มีบัญชีแล้ว? เข้าสู่ระบบ</button>`;
+    focusFirst();
+    const err = box.querySelector('#err');
+    box.querySelector('#toLogin').onclick = () => showLogin();
+    box.querySelector('#suForm').onsubmit = async e => {
+      e.preventDefault();
+      const name = box.querySelector('#sn').value.trim(), em = box.querySelector('#se').value.trim(), pw = box.querySelector('#sp').value;
+      const terms = box.querySelector('#st').checked, mk = box.querySelector('#sm').checked, btn = box.querySelector('#suBtn');
+      if(!name) return setErr(err, 'กรุณากรอกชื่อที่ให้เรียก');
+      if(!valid(em)) return setErr(err, 'กรุณากรอกอีเมลให้ถูกต้อง');
+      if(pw.length < 8 || !/\d/.test(pw) || !/[^\d\s]/.test(pw)) return setErr(err, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และมีทั้งตัวอักษรและตัวเลข');
+      if(!terms) return setErr(err, 'กรุณาติ๊กยอมรับนโยบายความเป็นส่วนตัวและข้อตกลงการใช้งานก่อนสมัคร');
+      setErr(err, ''); busy(btn, true, 'สมัครสมาชิก');
+      try{
+        const r = await api.signUp(em, pw, {display_name:name, accepted_terms:true, marketing_consent:mk}, next);
+        if(r.session) return afterSignIn();
+        showSent('ยืนยันอีเมลของคุณ', `เราส่งลิงก์ยืนยันไปที่ ${em} แล้ว กดลิงก์ในอีเมลเพื่อเปิดใช้บัญชี แล้วระบบจะพากลับมาที่นี่`, em);
+      }catch(ex){ busy(btn, false, 'สมัครสมาชิก'); setErr(err, A.thaiError(ex)); }
+    };
+  }
+
+  // ----- 3. Forgot password -----
+  function showForgot(prefill){
+    box.innerHTML = `
+      <h1>ลืมรหัสผ่าน</h1>
+      <p class="lead">กรอกอีเมลที่ใช้สมัคร เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปให้</p>
+      <div id="err"></div>
+      <form class="form" id="fgForm" novalidate>
+        <div class="field"><label for="fe">อีเมล</label><input id="fe" type="email" autocomplete="email" inputmode="email" required value="${esc(prefill || '')}"></div>
+        <button type="submit" class="btn btn-gold btn-block" id="fgBtn">ส่งลิงก์ตั้งรหัสผ่านใหม่</button>
+      </form>
+      <button type="button" class="link-btn" id="toLogin" style="justify-self:center">กลับไปหน้าเข้าสู่ระบบ</button>`;
+    focusFirst();
+    const err = box.querySelector('#err');
+    box.querySelector('#toLogin').onclick = () => showLogin();
+    box.querySelector('#fgForm').onsubmit = async e => {
+      e.preventDefault();
+      const em = box.querySelector('#fe').value.trim(), btn = box.querySelector('#fgBtn');
+      if(!valid(em)) return setErr(err, 'กรุณากรอกอีเมลให้ถูกต้อง');
+      busy(btn, true, 'ส่งลิงก์ตั้งรหัสผ่านใหม่');
+      try{ await api.resetPassword(em); showSent('เช็กอีเมลของคุณ', `ถ้า ${em} มีบัญชีอยู่ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว ลิงก์ใช้ได้ครั้งเดียวและมีเวลาจำกัด`); }
+      catch(ex){ busy(btn, false, 'ส่งลิงก์ตั้งรหัสผ่านใหม่'); setErr(err, A.thaiError(ex)); }
+    };
+  }
+
+  function showSent(title, text, resendTo){
+    box.innerHTML = `
+      <span class="ico ico-lg" style="justify-self:center" data-icon="logo"></span>
+      <h1>${esc(title)}</h1>
+      <div class="notice"><p>${esc(text)}</p><p class="small">ไม่เห็นอีเมล? ลองดูในโฟลเดอร์สแปม หรือโปรโมชัน</p></div>
+      <div id="err"></div>
+      ${resendTo ? '<button type="button" class="btn btn-line btn-block" id="resend">ส่งอีเมลยืนยันอีกครั้ง</button>' : ''}
+      <button type="button" class="link-btn" id="toLogin" style="justify-self:center">กลับไปหน้าเข้าสู่ระบบ</button>`;
+    paintIcons(); focusFirst();
+    box.querySelector('#toLogin').onclick = () => showLogin();
+    const rs = box.querySelector('#resend');
+    if(rs) rs.onclick = async () => {
+      rs.disabled = true;
+      try{ await api.resend(resendTo, next); setErr(box.querySelector('#err'), 'ส่งอีกครั้งแล้ว'); }
+      catch(ex){ rs.disabled = false; setErr(box.querySelector('#err'), A.thaiError(ex)); }
+    };
+  }
+
+  // ----- 4. Set a new password (from the email link) -----
+  function showReset(){
+    box.innerHTML = `
+      <h1>ตั้งรหัสผ่านใหม่</h1>
+      <div id="err"></div>
+      <form class="form" id="rsForm" novalidate>
+        <div class="field"><label for="rp">รหัสผ่านใหม่</label><input id="rp" type="password" autocomplete="new-password" minlength="8" required>
+          <span class="hint">อย่างน้อย 8 ตัวอักษร ผสมตัวอักษรกับตัวเลข</span></div>
+        <div class="field"><label for="rp2">พิมพ์รหัสผ่านใหม่อีกครั้ง</label><input id="rp2" type="password" autocomplete="new-password" required></div>
+        <button type="submit" class="btn btn-gold btn-block" id="rsBtn">บันทึกรหัสผ่านใหม่</button>
+      </form>`;
+    focusFirst();
+    const err = box.querySelector('#err');
+    box.querySelector('#rsForm').onsubmit = async e => {
+      e.preventDefault();
+      const p1 = box.querySelector('#rp').value, p2 = box.querySelector('#rp2').value, btn = box.querySelector('#rsBtn');
+      if(p1.length < 8 || !/\d/.test(p1) || !/[^\d\s]/.test(p1)) return setErr(err, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และมีทั้งตัวอักษรและตัวเลข');
+      if(p1 !== p2) return setErr(err, 'รหัสผ่านสองช่องไม่ตรงกัน');
+      busy(btn, true, 'บันทึกรหัสผ่านใหม่');
+      try{ await api.updatePassword(p1); recovery = false; Cosmic.toast('ตั้งรหัสผ่านใหม่แล้ว'); setTimeout(afterSignIn, 900); }
+      catch(ex){ busy(btn, false, 'บันทึกรหัสผ่านใหม่'); setErr(err, A.thaiError(ex)); }
+    };
+  }
+
+  // ----- 5. First sign-in with Google / Facebook / LINE: consent before anything else -----
+  function showConsent(s){
+    box.innerHTML = `
+      ${A.avatarHTML(s, 'avatar avatar-lg')}
+      <h1>ยินดีต้อนรับ ${esc(A.nameOf(s))}</h1>
+      <p class="lead">อีกขั้นเดียว ก่อนเริ่มบันทึกผลดาวของคุณไว้ดูย้อนหลัง</p>
+      <div id="err"></div>
+      <form class="form" id="csForm" novalidate>
+        ${CONSENT('ct', 'cm')}
+        <button type="submit" class="btn btn-gold btn-block" id="csBtn">ยืนยันและเริ่มใช้งาน</button>
+      </form>
+      <button type="button" class="link-btn" id="csOut" style="justify-self:center">ไม่ยอมรับ · ออกจากระบบ</button>`;
+    box.querySelector('.avatar').style.justifySelf = 'center';
+    focusFirst();
+    const err = box.querySelector('#err');
+    box.querySelector('#csOut').onclick = A.signOut;
+    box.querySelector('#csForm').onsubmit = async e => {
+      e.preventDefault();
+      const btn = box.querySelector('#csBtn');
+      if(!box.querySelector('#ct').checked) return setErr(err, 'กรุณาติ๊กยอมรับนโยบายความเป็นส่วนตัวและข้อตกลงการใช้งานก่อนเริ่มใช้งาน');
+      busy(btn, true, 'ยืนยันและเริ่มใช้งาน');
+      try{
+        await api.acceptTerms(box.querySelector('#cm').checked);
+        const s2 = await A.ready(true);
+        if(!s2.member) throw new Error('profile missing');
+        location.replace(next);
+      }catch(ex){ busy(btn, false, 'ยืนยันและเริ่มใช้งาน'); setErr(err, ex.message === 'profile missing' ? 'ระบบสมาชิกยังตั้งค่าไม่ครบ กรุณาแจ้งทีมงาน' : A.thaiError(ex)); }
+    };
+  }
+
+  async function afterSignIn(to){
+    const s = await A.ready(true);
+    if(!s.user) return showLogin('เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง');
+    if(!s.member) return showConsent(s);
+    location.replace(to || next);
+  }
+
+  function paintIcons(){ box.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Cosmic.ICONS[el.dataset.icon] || ''; }); }
+
+  // ----- Start -----
+  if(!api){ box.innerHTML = errBox('โหลดระบบสมาชิกไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วรีเฟรชหน้านี้อีกครั้ง'); return; }
+  const urlErr = q.get('error_description') || hash.get('error_description') || q.get('error') || hash.get('error');
+  const s = await A.ready();
+  if(recovery && s.user) return showReset();
+  if(urlErr && !s.user) return showLogin(A.thaiError({code:q.get('error_code') || hash.get('error_code') || q.get('error') || '', message:urlErr}));
+  if(s.user) return s.member ? location.replace(next) : showConsent(s);
+  if(recovery) return showLogin('ลิงก์ตั้งรหัสผ่านใหม่หมดอายุหรือถูกใช้ไปแล้ว กรุณากด "ลืมรหัสผ่าน" อีกครั้ง');
+  q.get('mode') === 'signup' && PROVIDERS.includes('email') ? showSignup() : showLogin();
+})();
+</script>
+</body>
+</html>

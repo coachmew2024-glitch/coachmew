@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ดาวของฉัน · Coach Mew Mastermind</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="Coach Mew Mastermind หน้าแรก">
+      <span class="logo-mark" data-icon="logo"></span>
+      <span class="logo-txt"><b>Coach Mew</b><small>MASTERMIND</small></span>
+    </a>
+    <ul class="menu" id="menu">
+      <li><a href="index.html">หน้าแรก</a></li>
+      <li><a href="index.html#coach">รู้จักโค้ชมิว</a></li>
+      <li><a href="quiz.html">ค้นหาดาวของคุณ</a></li>
+      <li><a href="index.html#coaching">Coaching</a></li>
+      <li><a href="index.html#course">คอร์สออนไลน์</a></li>
+    </ul>
+    <button class="burger" id="burger" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menu">☰</button>
+  </div>
+</header>
+
+<main class="page s-navy stars">
+  <div class="wrap" id="app" aria-live="polite">
+    <div class="panel center-panel c-deep"><p>กำลังโหลด...</p></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="slogan">เพื่อนร่วมทางในการสร้างตัวตน</span>
+    <ul>
+      <li><a href="privacy.html">Privacy Policy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+    </ul>
+    <span>© 2026 Coach Mew Mastermind</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
+<script src="cosmic.js"></script>
+<script src="auth.js"></script>
+<script>
+(async function(){
+  const {esc} = Cosmic, A = CosmicAuth, api = A.api;
+  const app = document.getElementById('app');
+  const s = await A.requireMember('account.html');
+  let data;
+  try{ data = await Cosmic.loadData(); }catch(e){ data = {types:{}}; }
+  const CODES = ['G', 'D', 'T', 'V'];
+
+  let results = [], bookings = [], loadErr = '';
+  try{ [results, bookings] = await Promise.all([api.myResults(), api.myBookings()]); }
+  catch(e){ console.error(e); loadErr = A.thaiError(e); }
+
+  const scores = r => `<ul class="mini-scores" aria-label="คะแนน 4 ไทป์">${CODES.map(c => {
+    const t = data.types[c], v = r['score_' + c.toLowerCase()];
+    return `<li class="${String(r.leading_types).includes(c) ? 'top' : ''}">${esc(t ? t.display_name : c)} ${v}</li>`; }).join('')}</ul>`;
+
+  function render(){
+    const p = s.profile;
+    app.innerHTML = `
+      <div class="stack-lg">
+        <section class="panel c-deep who-card" style="max-width:none">
+          ${A.avatarHTML(s, 'avatar avatar-lg')}
+          <div><span class="eyebrow">My Cosmic Account</span><h1>สวัสดี ${esc(A.nameOf(s))}</h1>${s.user.email ? `<p>${esc(s.user.email)}</p>` : ''}</div>
+        </section>
+        ${loadErr ? `<p class="err" role="alert">${esc(loadErr)}</p>` : ''}
+
+        <section class="r-card c-lgold" aria-labelledby="hStars">
+          <h2 id="hStars">ดาวของฉัน</h2>
+          ${results.length ? `
+            <p class="small">ผลแบบประเมินทุกครั้งของคุณ เรียงจากล่าสุด</p>
+            <ul class="items">${results.map((r, i) => `
+              <li class="item">
+                <div class="item-top"><b>${esc(A.typeNames(data, r.leading_types))}</b><span>${esc(A.fmtDate(r.created_at))}${i === 0 ? ' · ล่าสุด' : ''}</span></div>
+                ${scores(r)}
+                <div class="item-actions"><a class="btn btn-dark btn-sm" href="quiz.html?result=${encodeURIComponent(r.id)}">เปิดดูผลเต็ม</a></div>
+              </li>`).join('')}</ul>
+            <a class="btn btn-line" href="quiz.html">ทำแบบประเมินอีกครั้ง</a>` : `
+            <div class="empty"><p>ยังไม่มีผลที่บันทึกไว้ ทำแบบประเมินครั้งแรก แล้วผลจะมาอยู่ที่นี่</p>
+              <a class="btn btn-dark" href="quiz.html">ค้นพบดาวประจำตัว</a></div>`}
+        </section>
+
+        <section class="r-card c-navy" aria-labelledby="hBook">
+          <h2 id="hBook">การจอง Coaching</h2>
+          ${bookings.length ? `<ul class="items">${bookings.map(b => `
+              <li class="item">
+                <div class="item-top"><b>${esc(b.package)}</b><span class="badge s-${esc(b.status)}">${esc(A.STATUS[b.status] || b.status)}</span></div>
+                <p class="meta">วันเวลานัด: ${b.starts_at ? esc(A.fmtDate(b.starts_at)) : 'รอนัดวันเวลา'}</p>
+                ${b.note ? `<p class="meta">หมายเหตุ: ${esc(b.note)}</p>` : ''}
+              </li>`).join('')}</ul>
+            <div class="item-actions">${Cosmic.lineButton('ติดต่อทีมทาง LINE', 'btn-line', 'cta_coaching')}</div>` : `
+            <div class="empty"><p>ยังไม่มีการจอง</p>${Cosmic.lineButton('จองคิว Personal Brand Coaching ทาง LINE', 'btn-gold', 'cta_coaching')}</div>`}
+        </section>
+
+        <section class="r-card c-off" aria-labelledby="hSet">
+          <h2 id="hSet">ตั้งค่าบัญชี</h2>
+          <form class="form" id="nameForm" novalidate>
+            <div class="field"><label for="dn">ชื่อที่ให้เรียก</label><input id="dn" type="text" maxlength="60" autocomplete="nickname" value="${esc(p.display_name || '')}"></div>
+            <div><button type="submit" class="btn btn-dark btn-sm" id="nameBtn">บันทึกชื่อ</button></div>
+          </form>
+          <label class="check"><input type="checkbox" id="mk" ${p.marketing_consent ? 'checked' : ''}>
+            <span>รับข่าวสาร คอนเทนต์ และโปรโมชันจาก Coach Mew Mastermind
+            <span class="small" style="display:block">${p.marketing_consent_at ? 'เปลี่ยนล่าสุด ' + esc(A.fmtDate(p.marketing_consent_at)) : ''}</span></span></label>
+          <p class="small">ยอมรับนโยบายความเป็นส่วนตัวและข้อตกลงการใช้งานเมื่อ ${esc(A.fmtDate(p.accepted_terms_at))} ·
+            <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></p>
+          <div><button type="button" class="btn btn-line btn-sm" id="logout">ออกจากระบบ</button></div>
+        </section>
+
+        <section class="r-card c-off danger" aria-labelledby="hDel">
+          <h2 id="hDel">ลบบัญชีและข้อมูลทั้งหมด</h2>
+          <p>ลบบัญชีนี้ พร้อมผลแบบประเมินทุกครั้ง ประวัติการจอง และข้อมูลการยินยอมทั้งหมดออกจากระบบ</p>
+          <div id="delArea"><button type="button" class="btn btn-line btn-sm" id="del1">ลบบัญชีของฉัน</button></div>
+        </section>
+      </div>`;
+
+    app.querySelectorAll('a[data-track]').forEach(a => a.addEventListener('click', () => Cosmic.track(a.dataset.track)));
+    document.getElementById('nameForm').onsubmit = async e => {
+      e.preventDefault();
+      const v = document.getElementById('dn').value.trim(), btn = document.getElementById('nameBtn');
+      if(!v) return Cosmic.toast('กรุณากรอกชื่อ');
+      btn.disabled = true;
+      try{ await api.setName(v); s.profile.display_name = v; Cosmic.toast('บันทึกชื่อแล้ว'); A.ready(true); A.renderNav(); render(); }
+      catch(ex){ btn.disabled = false; Cosmic.toast(A.thaiError(ex)); }
+    };
+    document.getElementById('mk').onchange = async e => {
+      const on = e.target.checked; e.target.disabled = true;
+      try{ await api.setMarketing(on); s.profile.marketing_consent = on; s.profile.marketing_consent_at = new Date().toISOString();
+        Cosmic.toast(on ? 'เปิดรับข่าวสารแล้ว' : 'ยกเลิกรับข่าวสารแล้ว'); render(); }
+      catch(ex){ e.target.checked = !on; e.target.disabled = false; Cosmic.toast(A.thaiError(ex)); }
+    };
+    document.getElementById('logout').onclick = A.signOut;
+    // delete: step 1 shows what goes, step 2 needs the word typed in
+    document.getElementById('del1').onclick = () => {
+      const area = document.getElementById('delArea');
+      area.innerHTML = `
+        <div class="danger-box" role="alertdialog" aria-labelledby="delT">
+          <b id="delT">ยืนยันการลบบัญชี (ขั้นที่ 2 จาก 2)</b>
+          <ul><li>ผลแบบประเมินทั้งหมด ${results.length} ครั้ง</li><li>ประวัติการจอง ${bookings.length} รายการ</li><li>ชื่อ อีเมล และข้อมูลการยินยอม</li></ul>
+          <p>ลบแล้วกู้คืนไม่ได้ ถ้าต้องการใช้งานอีกต้องสมัครใหม่</p>
+          <div class="field"><label for="delWord">พิมพ์คำว่า <b>ลบบัญชี</b> เพื่อยืนยัน</label><input id="delWord" type="text" autocomplete="off"></div>
+          <div class="item-actions">
+            <button type="button" class="btn btn-dark btn-sm" id="del2" disabled>ลบบัญชีและข้อมูลถาวร</button>
+            <button type="button" class="btn btn-line btn-sm" id="delCancel">ยกเลิก</button>
+          </div>
+        </div>`;
+      const w = document.getElementById('delWord'), b2 = document.getElementById('del2');
+      w.focus();
+      w.oninput = () => { b2.disabled = w.value.trim() !== 'ลบบัญชี'; };
+      document.getElementById('delCancel').onclick = render;
+      b2.onclick = async () => {
+        b2.disabled = true; b2.textContent = 'กำลังลบ...';
+        try{
+          await api.deleteAccount();
+          try{ sessionStorage.removeItem('cosmic-quiz'); }catch(x){}
+          app.innerHTML = `<div class="panel center-panel c-deep"><h1 style="font-size:26px">ลบบัญชีเรียบร้อยแล้ว</h1>
+            <p class="lead">ข้อมูลทั้งหมดของคุณถูกลบออกจากระบบแล้ว ขอบคุณที่เคยร่วมเดินทางกับเรา</p>
+            <a class="btn btn-gold" href="index.html">กลับหน้าแรก</a></div>`;
+          A.ready(true); A.renderNav();
+        }catch(ex){ b2.disabled = false; b2.textContent = 'ลบบัญชีและข้อมูลถาวร'; Cosmic.toast(A.thaiError(ex)); }
+      };
+    };
+  }
+  render();
+})();
+</script>
+</body>
+</html>

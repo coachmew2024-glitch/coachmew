@@ -38,11 +38,17 @@
 <footer>
   <div class="wrap foot">
     <span class="slogan">เพื่อนร่วมทางในการสร้างตัวตน</span>
+    <ul>
+      <li><a href="privacy.html">Privacy Policy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+    </ul>
     <span>© 2026 Coach Mew Mastermind</span>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
 <script src="cosmic.js"></script>
+<script src="auth.js"></script>
 <script>
 (async function(){
   const {esc, ICONS, store, track} = Cosmic;
@@ -85,7 +91,38 @@
   // never sit past the first unanswered question
   const firstGap = S.answers.findIndex(a=>!a);
   if(firstGap !== -1 && S.pos > screenOfQ(firstGap)) S.pos = screenOfQ(firstGap);
-  const save = () => store.set(KEY, S);
+  // Anyone can take the quiz and read the result. Saving the card, the PDF and the course buttons need an account (free).
+  const auth = await CosmicAuth.ready();
+  const url = new URLSearchParams(location.search);
+  const cleanUrl = () => history.replaceState(null, '', location.pathname);
+  // ?result=ID → show that saved result (from "ดาวของฉัน" or the admin page) without touching the quiz in progress
+  let VIEW = null;
+  if(url.get('result')){
+    if(!auth.member){ location.replace(CosmicAuth.loginUrl('quiz.html?result=' + encodeURIComponent(url.get('result')))); return; }
+    let row = null;
+    try{ row = await CosmicAuth.api.result(url.get('result')); }catch(e){ console.error(e); }
+    if(!row || String(row.answers || '').length !== N){
+      app.innerHTML = '<div class="panel center-panel c-deep"><p>ไม่พบผลนี้ หรือบัญชีนี้ไม่มีสิทธิ์เปิดดู</p><a class="btn btn-gold" href="account.html">กลับไปดาวของฉัน</a></div>';
+      return;
+    }
+    VIEW = row;
+    S = {pos:SCREENS.length - 1, answers:row.answers.split(''), saved:true, accountSaved:true, tab:null};
+  }
+  const save = () => { if(!VIEW) store.set(KEY, S); };
+  // Not signed in → the result is kept without a name (as before).
+  // Signed in — now, or later when logging in to save the card / PDF — → also saved to the account, once.
+  function saveAnon(r){ S.saved = true; save(); Cosmic.saveResult(S.answers, r, false); }
+  function saveToAccount(r){
+    S.saved = true; S.accountSaved = true; save();
+    Promise.resolve(Cosmic.saveResult(S.answers, r, true)).then(id => { if(id){ S.resultId = id; save(); } })
+      .catch(e => { console.error(e); S.accountSaved = false; save(); Cosmic.toast('ยังบันทึกผลเข้าบัญชีไม่สำเร็จ ระบบจะลองใหม่เมื่อเปิดหน้านี้อีกครั้ง'); });
+  }
+  // Card / PDF: signed-out visitors go to the login page, then come straight back to this result
+  function needMember(after){
+    if(auth.member || VIEW) return false;
+    location.href = CosmicAuth.loginUrl('quiz.html?after=' + after);
+    return true;
+  }
   const go = pos => { S.pos = pos; save(); render(); };
 
   function render(){
@@ -180,7 +217,7 @@
       if(moving) return;
       moving = true;
       app.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed', x === b));
-      if(S.answers[i] !== b.dataset.opt) S.saved = false;
+      if(S.answers[i] !== b.dataset.opt){ S.saved = false; S.accountSaved = false; }
       S.answers[i] = b.dataset.opt; save();
       track('answer', {question_no:i+1, option:S.answers[i]});
       setTimeout(()=>go(S.pos+1), 320);   // short pause so the choice is seen lighting up
@@ -201,7 +238,8 @@
       </div>`;
     document.getElementById('reveal').onclick = ()=>{
       const r = Cosmic.score(data, S.answers);
-      if(!S.saved){ Cosmic.saveResult(S.answers, r); S.saved = true; }
+      if(auth.member){ if(!S.accountSaved) saveToAccount(r); }
+      else if(!S.saved) saveAnon(r);
       track('reveal', {}, true);
       S.tab = r.leading[0];
       go(S.pos+1);
@@ -216,12 +254,14 @@
     const r = Cosmic.score(data, S.answers);
     const tie = r.leading.length > 1;
     if(!r.leading.includes(S.tab)) S.tab = r.leading[0];
+    if(auth.member && !S.accountSaved && !VIEW) saveToAccount(r);
     const code = S.tab, t = data.types[code];
     const list = arr => `<ul>${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
     const [first, ...rest] = t.intro;
 
     app.innerHTML = `
       <div class="result">
+        ${VIEW ? `<p class="tie-note c-lgold no-print">ผลที่บันทึกไว้เมื่อ ${esc(CosmicAuth.fmtDate(VIEW.created_at))} · <a href="account.html">กลับไปดาวของฉัน</a></p>` : ''}
         ${tie ? `
           <p class="tie-note c-lgold">${esc(TIE_TEXT)}</p>
           <div class="tabs" role="tablist" aria-label="ดวงดาวที่โดดเด่นของคุณ">
@@ -265,6 +305,7 @@
             <button type="button" class="btn btn-line flip-btn" id="flipBtn" aria-controls="flip">↻ <span>พลิกดูด้านหลัง</span></button>
             <button type="button" class="btn btn-gold flip-btn" id="saveCard">บันทึกการ์ด (หน้า + หลัง)</button>
           </div>
+          ${auth.member ? '' : '<p class="small no-print login-hint">บันทึกการ์ด ดาวน์โหลด PDF และดูคอร์ส ต้องเข้าสู่ระบบก่อน (ฟรี) แล้วผลของคุณจะถูกเก็บไว้ดูย้อนหลังด้วย</p>'}
         </div>
 
         <!-- 2. Score bars -->
@@ -323,6 +364,7 @@
         <!-- 7. Share / PDF / CTA -->
         <section class="r-card c-lgold no-print">
           <h2>ไปต่อจากผลของคุณ</h2>
+          ${auth.member ? '' : '<p class="small">ดาวน์โหลด PDF และดูคอร์ส ต้องเข้าสู่ระบบก่อน (ฟรี)</p>'}
           <div class="actions">
             <button type="button" class="btn btn-dark" id="share">แชร์ดวงดาวของฉัน</button>
             <button type="button" class="btn btn-line" id="pdf">ดาวน์โหลดผลลัพธ์ PDF</button>
@@ -349,12 +391,12 @@
     };
     flip.onclick = ()=>setFlip(flip.dataset.flipped !== 'true');
     flipBtn.onclick = ()=>setFlip(flip.dataset.flipped !== 'true');
-    document.getElementById('saveCard').onclick = e=>saveCard(code, r, e.currentTarget);
+    document.getElementById('saveCard').onclick = e=>{ if(needMember('card')) return; saveCard(code, r, e.currentTarget); };
     app.querySelectorAll('[data-tab]').forEach(b=>b.onclick = ()=>{ S.tab = b.dataset.tab; save(); renderResult(); Cosmic.reveal(app); });
     document.getElementById('share').onclick = ()=>{ track('share'); shareCard(code); };
-    document.getElementById('pdf').onclick = ()=>{ track('pdf'); printResult(); };
+    document.getElementById('pdf').onclick = ()=>{ if(needMember('pdf')) return; track('pdf'); printResult(); };
     document.getElementById('copy').onclick = copyLink;
-    document.getElementById('retake').onclick = ()=>{ S = fresh(); Cosmic.newSession(); go(0); };
+    document.getElementById('retake').onclick = ()=>{ if(VIEW){ VIEW = null; cleanUrl(); } S = fresh(); Cosmic.newSession(); go(0); };
     app.querySelectorAll('a[data-track]').forEach(a=>a.addEventListener('click', ()=>track(a.dataset.track)));
   }
 
@@ -587,6 +629,17 @@
   }
 
   render();
+  // just came back from the login page → point at the button they wanted
+  const after = !VIEW && url.get('after');
+  if(after){
+    cleanUrl();
+    const target = {card:'#saveCard', pdf:'#pdf', course:'a[data-track="cta_course"]'}[after];
+    const el = target && auth.member && SCREENS[S.pos].k === 'result' && app.querySelector(target);
+    if(el){
+      setTimeout(()=>{ el.scrollIntoView({block:'center', behavior:'smooth'}); el.classList.add('attn'); }, 400);
+      Cosmic.toast({card:'เข้าสู่ระบบแล้ว กด "บันทึกการ์ด" ได้เลย', pdf:'เข้าสู่ระบบแล้ว กด "ดาวน์โหลดผลลัพธ์ PDF" ได้เลย', course:'เข้าสู่ระบบแล้ว กดดูคอร์สได้เลย'}[after]);
+    }
+  }
 })();
 </script>
 </body>
