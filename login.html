@@ -31,8 +31,12 @@
 
 <main class="page s-navy stars">
   <div class="wrap">
-    <div class="panel c-deep auth" id="box" aria-live="polite">
-      <p class="lead">กำลังโหลด...</p>
+    <div class="auth-flip" id="authFlip" data-flipped="false">
+      <div class="auth-face front panel c-deep auth" id="box" aria-live="polite">
+        <p class="lead">กำลังโหลด...</p>
+      </div>
+      <div class="auth-face back panel c-lgold auth" id="back" aria-live="polite" aria-hidden="true" inert></div>
+      <div class="auth-face slide panel c-deep auth" id="slide" aria-live="polite" aria-hidden="true" inert></div>
     </div>
   </div>
 </main>
@@ -54,7 +58,25 @@
 <script>
 (async function(){
   const {esc, CONFIG} = Cosmic, A = CosmicAuth, api = A.api;
-  const box = document.getElementById('box');
+  const box = document.getElementById('box');            // front of the card: sign in (and the other steps)
+  const back = document.getElementById('back');          // back of the card: sign up
+  const flipEl = document.getElementById('authFlip');
+  const slide = document.getElementById('slide');        // extra card laid on top from the side: forgot password
+  function setSlide(on){
+    const hiding = on ? box : slide;
+    if(hiding.contains(document.activeElement)) document.activeElement.blur();
+    flipEl.dataset.slide = on;
+    slide.inert = !on; slide.setAttribute('aria-hidden', !on);
+    if(on){ box.inert = true; box.setAttribute('aria-hidden', true); }   // the card underneath waits
+  }
+  function setFlip(on){
+    setSlide(false);
+    const hiding = on ? box : back;                       // let go of focus before that side is hidden
+    if(hiding.contains(document.activeElement)) document.activeElement.blur();
+    flipEl.dataset.flipped = on;
+    box.setAttribute('aria-hidden', on); back.setAttribute('aria-hidden', !on);
+    box.inert = on; back.inert = !on;                     // the hidden side can't be tabbed into
+  }
   const q = new URLSearchParams(location.search), hash = new URLSearchParams(location.hash.slice(1));
   const next = A.safeNext(q.get('next')) || 'account.html';
   const PROVIDERS = (CONFIG.AUTH_PROVIDERS || []).map(p => String(p).toLowerCase());
@@ -75,11 +97,12 @@
   const errBox = msg => `<p class="err" role="alert">${esc(msg)}</p>`;
   const setErr = (el, msg) => { el.innerHTML = msg ? errBox(msg) : ''; };
   const busy = (btn, on, label) => { btn.disabled = on; if(label) btn.textContent = on ? 'กำลังดำเนินการ...' : label; };
-  const focusFirst = () => { const h = box.querySelector('h1'); if(h){ h.setAttribute('tabindex', '-1'); h.focus({preventScroll:true}); } window.scrollTo(0, 0); };
+  const focusFirst = (el = box) => { const h = el.querySelector('h1'); if(h){ h.setAttribute('tabindex', '-1'); h.focus({preventScroll:true}); } window.scrollTo(0, 0); };
   const valid = email => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
   // ----- 1. Sign in (provider buttons + email + password) -----
   function showLogin(msg){
+    setFlip(false);
     const prov = [
       ['google', 'G', 'เข้าสู่ระบบด้วย Google', 'google'],
       ['facebook', 'f', 'เข้าสู่ระบบด้วย Facebook', 'facebook'],
@@ -140,7 +163,7 @@
 
   // ----- 2. Sign up with email -----
   function showSignup(prefill){
-    box.innerHTML = `
+    back.innerHTML = `
       <h1>สมัครสมาชิก</h1>
       <p class="lead">${PURPOSE}</p>
       <div id="err"></div>
@@ -153,13 +176,13 @@
         <button type="submit" class="btn btn-gold btn-block" id="suBtn">สมัครสมาชิก</button>
       </form>
       <button type="button" class="link-btn" id="toLogin" style="justify-self:center">มีบัญชีแล้ว? เข้าสู่ระบบ</button>`;
-    focusFirst();
-    const err = box.querySelector('#err');
-    box.querySelector('#toLogin').onclick = () => showLogin();
-    box.querySelector('#suForm').onsubmit = async e => {
+    setFlip(true); focusFirst(back);
+    const err = back.querySelector('#err');
+    back.querySelector('#toLogin').onclick = () => showLogin();
+    back.querySelector('#suForm').onsubmit = async e => {
       e.preventDefault();
-      const name = box.querySelector('#sn').value.trim(), em = box.querySelector('#se').value.trim(), pw = box.querySelector('#sp').value;
-      const terms = box.querySelector('#st').checked, mk = box.querySelector('#sm').checked, btn = box.querySelector('#suBtn');
+      const name = back.querySelector('#sn').value.trim(), em = back.querySelector('#se').value.trim(), pw = back.querySelector('#sp').value;
+      const terms = back.querySelector('#st').checked, mk = back.querySelector('#sm').checked, btn = back.querySelector('#suBtn');
       if(!name) return setErr(err, 'กรุณากรอกชื่อที่ให้เรียก');
       if(!valid(em)) return setErr(err, 'กรุณากรอกอีเมลให้ถูกต้อง');
       if(pw.length < 8 || !/\d/.test(pw) || !/[^\d\s]/.test(pw)) return setErr(err, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และมีทั้งตัวอักษรและตัวเลข');
@@ -175,7 +198,8 @@
 
   // ----- 3. Forgot password -----
   function showForgot(prefill){
-    box.innerHTML = `
+    setFlip(false);
+    slide.innerHTML = `
       <h1>ลืมรหัสผ่าน</h1>
       <p class="lead">กรอกอีเมลที่ใช้สมัคร เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปให้</p>
       <div id="err"></div>
@@ -184,39 +208,41 @@
         <button type="submit" class="btn btn-gold btn-block" id="fgBtn">ส่งลิงก์ตั้งรหัสผ่านใหม่</button>
       </form>
       <button type="button" class="link-btn" id="toLogin" style="justify-self:center">กลับไปหน้าเข้าสู่ระบบ</button>`;
-    focusFirst();
-    const err = box.querySelector('#err');
-    box.querySelector('#toLogin').onclick = () => showLogin();
-    box.querySelector('#fgForm').onsubmit = async e => {
+    setSlide(true); focusFirst(slide);
+    const err = slide.querySelector('#err');
+    slide.querySelector('#toLogin').onclick = () => showLogin();
+    slide.querySelector('#fgForm').onsubmit = async e => {
       e.preventDefault();
-      const em = box.querySelector('#fe').value.trim(), btn = box.querySelector('#fgBtn');
+      const em = slide.querySelector('#fe').value.trim(), btn = slide.querySelector('#fgBtn');
       if(!valid(em)) return setErr(err, 'กรุณากรอกอีเมลให้ถูกต้อง');
       busy(btn, true, 'ส่งลิงก์ตั้งรหัสผ่านใหม่');
-      try{ await api.resetPassword(em); showSent('เช็กอีเมลของคุณ', `ถ้า ${em} มีบัญชีอยู่ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว ลิงก์ใช้ได้ครั้งเดียวและมีเวลาจำกัด`); }
+      try{ await api.resetPassword(em); showSent('เช็กอีเมลของคุณ', `ถ้า ${em} มีบัญชีอยู่ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว ลิงก์ใช้ได้ครั้งเดียวและมีเวลาจำกัด`, '', slide); }
       catch(ex){ busy(btn, false, 'ส่งลิงก์ตั้งรหัสผ่านใหม่'); setErr(err, A.thaiError(ex)); }
     };
   }
 
-  function showSent(title, text, resendTo){
-    box.innerHTML = `
+  function showSent(title, text, resendTo, el = box){
+    if(el === box) setFlip(false);
+    el.innerHTML = `
       <span class="ico ico-lg" style="justify-self:center" data-icon="logo"></span>
       <h1>${esc(title)}</h1>
       <div class="notice"><p>${esc(text)}</p><p class="small">ไม่เห็นอีเมล? ลองดูในโฟลเดอร์สแปม หรือโปรโมชัน</p></div>
       <div id="err"></div>
       ${resendTo ? '<button type="button" class="btn btn-line btn-block" id="resend">ส่งอีเมลยืนยันอีกครั้ง</button>' : ''}
       <button type="button" class="link-btn" id="toLogin" style="justify-self:center">กลับไปหน้าเข้าสู่ระบบ</button>`;
-    paintIcons(); focusFirst();
-    box.querySelector('#toLogin').onclick = () => showLogin();
-    const rs = box.querySelector('#resend');
+    paintIcons(el); focusFirst(el);
+    el.querySelector('#toLogin').onclick = () => showLogin();
+    const rs = el.querySelector('#resend');
     if(rs) rs.onclick = async () => {
       rs.disabled = true;
-      try{ await api.resend(resendTo, next); setErr(box.querySelector('#err'), 'ส่งอีกครั้งแล้ว'); }
-      catch(ex){ rs.disabled = false; setErr(box.querySelector('#err'), A.thaiError(ex)); }
+      try{ await api.resend(resendTo, next); setErr(el.querySelector('#err'), 'ส่งอีกครั้งแล้ว'); }
+      catch(ex){ rs.disabled = false; setErr(el.querySelector('#err'), A.thaiError(ex)); }
     };
   }
 
   // ----- 4. Set a new password (from the email link) -----
   function showReset(){
+    setFlip(false);
     box.innerHTML = `
       <h1>ตั้งรหัสผ่านใหม่</h1>
       <div id="err"></div>
@@ -241,6 +267,7 @@
 
   // ----- 5. First sign-in with Google / Facebook / LINE: consent before anything else -----
   function showConsent(s){
+    setFlip(false);
     box.innerHTML = `
       ${A.avatarHTML(s, 'avatar avatar-lg')}
       <h1>ยินดีต้อนรับ ${esc(A.nameOf(s))}</h1>
@@ -276,7 +303,7 @@
     location.replace(to || next);
   }
 
-  function paintIcons(){ box.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Cosmic.ICONS[el.dataset.icon] || ''; }); }
+  function paintIcons(el = box){ el.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Cosmic.ICONS[el.dataset.icon] || ''; }); }
 
   // ----- Start -----
   if(!api){ box.innerHTML = errBox('โหลดระบบสมาชิกไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วรีเฟรชหน้านี้อีกครั้ง'); return; }
